@@ -1,0 +1,158 @@
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache miss for repos_page_1"}
+{"level":"info","message":"Cache hit for repos_page_9"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache hit for repos_page_9"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache hit for repos_page_9"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache hit for repos_page_9"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache miss for repos_page_9"}
+{"level":"info","message":"Cache miss for repos_page_1"}
+{"level":"error","message":"Repository fetch error: cache.setSessionLastPage is not a function","stack":"TypeError: cache.setSessionLastPage is not a function\n    at fetchRepositories (C:\\Users\\rache\\scrap-manager\\node\\api\\fetchRepos.js:63:17)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async C:\\Users\\rache\\scrap-manager\\node\\server.js:34:19"}
+{"level":"error","message":"Error fetching repositories: cache.setSessionLastPage is not a function","stack":"TypeError: cache.setSessionLastPage is not a function\n    at fetchRepositories (C:\\Users\\rache\\scrap-manager\\node\\api\\fetchRepos.js:63:17)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async C:\\Users\\rache\\scrap-manager\\node\\server.js:34:19"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache miss for repos_page_1"}
+{"level":"info","message":"Cache hit for repos_page_9"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache hit for repos_page_9"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache miss for undefined"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache miss for repositories_page_9, session: wZvmbq0nqzEC7b1t3eWhBSohast-6ICv"}
+{"level":"info","message":"Cache miss for repositories_page_1, session: wZvmbq0nqzEC7b1t3eWhBSohast-6ICv"}
+{"level":"info","message":"Cache miss for repositories_page_9, session: wZvmbq0nqzEC7b1t3eWhBSohast-6ICv"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache miss for repositories_page_1, session: qt0HyA0dNSf82WhPkPkZT7e7vTVTm1iB"}
+{"level":"info","message":"Cache miss for repositories_page_9, session: qt0HyA0dNSf82WhPkPkZT7e7vTVTm1iB"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache miss for repositories_page_1, session: BLr-Bk6SrkrvJ_M-yAGSQCwwGSGe0RbE"}
+{"level":"info","message":"Cache miss for repositories_page_1, session: BLr-Bk6SrkrvJ_M-yAGSQCwwGSGe0RbE"}
+{"level":"info","message":"Cache miss for repositories_page_12, session: BLr-Bk6SrkrvJ_M-yAGSQCwwGSGe0RbE"}
+{"level":"info","message":"Cache hit for repositories_page_1, session: BLr-Bk6SrkrvJ_M-yAGSQCwwGSGe0RbE"}
+{"level":"info","message":"Cache hit for repositories_page_9, session: BLr-Bk6SrkrvJ_M-yAGSQCwwGSGe0RbE"}
+{"level":"info","message":"Cache hit for repositories_page_1, session: BLr-Bk6SrkrvJ_M-yAGSQCwwGSGe0RbE"}
+{"level":"info","message":"Cache hit for repositories_page_10, session: BLr-Bk6SrkrvJ_M-yAGSQCwwGSGe0RbE"}
+{"level":"info","message":"Cache hit for repositories_page_10, session: BLr-Bk6SrkrvJ_M-yAGSQCwwGSGe0RbE"}
+{"level":"info","message":"Cache hit for repositories_page_1, session: BLr-Bk6SrkrvJ_M-yAGSQCwwGSGe0RbE"}
+{"level":"info","message":"Cache miss for repositories_page_11, session: BLr-Bk6SrkrvJ_M-yAGSQCwwGSGe0RbE"}
+{"level":"info","message":"Cache miss for repositories_page_1, session: BLr-Bk6SrkrvJ_M-yAGSQCwwGSGe0RbE"}
+{"level":"info","message":"Cache miss for repositories_page_11, session: BLr-Bk6SrkrvJ_M-yAGSQCwwGSGe0RbE"}
+{"level":"info","message":"Cache hit for repositories_page_1, session: BLr-Bk6SrkrvJ_M-yAGSQCwwGSGe0RbE"}
+{"level":"info","message":"Cache hit for repositories_page_9, session: BLr-Bk6SrkrvJ_M-yAGSQCwwGSGe0RbE"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"error","message":"Repository fetch error: Cannot read properties of undefined (reading 'id')","stack":"TypeError: Cannot read properties of undefined (reading 'id')\n    at fetchRepositories (C:\\Users\\rache\\scrap-manager\\node\\api\\fetchRepos.js:20:49)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async C:\\Users\\rache\\scrap-manager\\node\\server.js:47:19"}
+{"level":"error","message":"Error fetching repositories: Cannot read properties of undefined (reading 'id')","stack":"TypeError: Cannot read properties of undefined (reading 'id')\n    at fetchRepositories (C:\\Users\\rache\\scrap-manager\\node\\api\\fetchRepos.js:20:49)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async C:\\Users\\rache\\scrap-manager\\node\\server.js:47:19"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache miss for repositories_page_1, session: C59NiE3YW96SGGe75NIGkyurtqKDuUcv"}
+{"level":"error","message":"Repository fetch error: CACHE_TTL is not defined","stack":"ReferenceError: CACHE_TTL is not defined\n    at Object.cachePage (C:\\Users\\rache\\scrap-manager\\node\\redis\\cacheManager.js:39:37)\n    at fetchRepositories (C:\\Users\\rache\\scrap-manager\\node\\api\\fetchRepos.js:48:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async C:\\Users\\rache\\scrap-manager\\node\\server.js:34:19"}
+{"level":"error","message":"Error fetching repositories: CACHE_TTL is not defined","stack":"ReferenceError: CACHE_TTL is not defined\n    at Object.cachePage (C:\\Users\\rache\\scrap-manager\\node\\redis\\cacheManager.js:39:37)\n    at fetchRepositories (C:\\Users\\rache\\scrap-manager\\node\\api\\fetchRepos.js:48:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async C:\\Users\\rache\\scrap-manager\\node\\server.js:34:19"}
+{"level":"info","message":"Cache miss for repositories_page_1, session: C59NiE3YW96SGGe75NIGkyurtqKDuUcv"}
+{"level":"error","message":"Repository fetch error: CACHE_TTL is not defined","stack":"ReferenceError: CACHE_TTL is not defined\n    at Object.cachePage (C:\\Users\\rache\\scrap-manager\\node\\redis\\cacheManager.js:39:37)\n    at fetchRepositories (C:\\Users\\rache\\scrap-manager\\node\\api\\fetchRepos.js:48:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async C:\\Users\\rache\\scrap-manager\\node\\server.js:34:19"}
+{"level":"error","message":"Error fetching repositories: CACHE_TTL is not defined","stack":"ReferenceError: CACHE_TTL is not defined\n    at Object.cachePage (C:\\Users\\rache\\scrap-manager\\node\\redis\\cacheManager.js:39:37)\n    at fetchRepositories (C:\\Users\\rache\\scrap-manager\\node\\api\\fetchRepos.js:48:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async C:\\Users\\rache\\scrap-manager\\node\\server.js:34:19"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache miss for repositories_page_1, session: eyj09yvT7Q2hwkW25z7_l3PRJCzUHz3e"}
+{"level":"info","message":"Cache miss for repositories_page_1, session: puoyahS8CigiV0VhQRNWeEDRgimwSqxH"}
+{"level":"error","message":"Repository fetch error: CACHE_TTL is not defined","stack":"ReferenceError: CACHE_TTL is not defined\n    at Object.cachePage (C:\\Users\\rache\\scrap-manager\\node\\redis\\cacheManager.js:39:37)\n    at fetchRepositories (C:\\Users\\rache\\scrap-manager\\node\\api\\fetchRepos.js:48:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async C:\\Users\\rache\\scrap-manager\\node\\server.js:34:19"}
+{"level":"error","message":"Error fetching repositories: CACHE_TTL is not defined","stack":"ReferenceError: CACHE_TTL is not defined\n    at Object.cachePage (C:\\Users\\rache\\scrap-manager\\node\\redis\\cacheManager.js:39:37)\n    at fetchRepositories (C:\\Users\\rache\\scrap-manager\\node\\api\\fetchRepos.js:48:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async C:\\Users\\rache\\scrap-manager\\node\\server.js:34:19"}
+{"level":"error","message":"Repository fetch error: CACHE_TTL is not defined","stack":"ReferenceError: CACHE_TTL is not defined\n    at Object.cachePage (C:\\Users\\rache\\scrap-manager\\node\\redis\\cacheManager.js:39:37)\n    at fetchRepositories (C:\\Users\\rache\\scrap-manager\\node\\api\\fetchRepos.js:48:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async C:\\Users\\rache\\scrap-manager\\node\\server.js:34:19"}
+{"level":"error","message":"Error fetching repositories: CACHE_TTL is not defined","stack":"ReferenceError: CACHE_TTL is not defined\n    at Object.cachePage (C:\\Users\\rache\\scrap-manager\\node\\redis\\cacheManager.js:39:37)\n    at fetchRepositories (C:\\Users\\rache\\scrap-manager\\node\\api\\fetchRepos.js:48:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async C:\\Users\\rache\\scrap-manager\\node\\server.js:34:19"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache miss for repositories_page_1, session: NJEj-Fqer3iiqR85hM6X5FME6G2ThCFX"}
+{"level":"info","message":"Cache hit for repositories_page_8, session: NJEj-Fqer3iiqR85hM6X5FME6G2ThCFX"}
+{"level":"info","message":"Cache hit for repositories_page_1, session: NJEj-Fqer3iiqR85hM6X5FME6G2ThCFX"}
+{"level":"info","message":"Cache miss for repositories_page_11, session: NJEj-Fqer3iiqR85hM6X5FME6G2ThCFX"}
+{"level":"error","message":"Repository fetch error: Cannot read properties of undefined (reading 'id')","stack":"TypeError: Cannot read properties of undefined (reading 'id')\n    at fetchRepositories (C:\\Users\\rache\\scrap-manager\\node\\api\\fetchRepos.js:20:49)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async C:\\Users\\rache\\scrap-manager\\node\\server.js:34:19"}
+{"level":"error","message":"Error fetching repositories: Cannot read properties of undefined (reading 'id')","stack":"TypeError: Cannot read properties of undefined (reading 'id')\n    at fetchRepositories (C:\\Users\\rache\\scrap-manager\\node\\api\\fetchRepos.js:20:49)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async C:\\Users\\rache\\scrap-manager\\node\\server.js:34:19"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache miss for repos_page_1"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache miss for repos_page_1"}
+{"level":"info","message":"Cache miss for repos_page_11"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache hit for repositories_page_1, session: 3CtHUEusitUUvJRXhHqdyAa5gJhHwsrB"}
+{"level":"info","message":"Cache hit for repositories_page_12, session: 3CtHUEusitUUvJRXhHqdyAa5gJhHwsrB"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache miss for repositories_page_1"}
+{"level":"info","message":"Cache miss for repositories_page_11"}
+{"level":"info","message":"Cache hit for repositories_page_1"}
+{"level":"info","message":"Cache hit for repositories_page_10"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache miss for repositories_page_10"}
+{"level":"info","message":"Cache miss for repositories_page_1"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache miss for repositories_page_1"}
