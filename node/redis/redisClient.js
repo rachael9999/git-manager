@@ -1,5 +1,5 @@
 const redis = require('redis');
-const {logger} = require('../logger/winstonConfig');
+const {logger} = require('../utils/logger/winstonConfig');
 
 const redisClient = redis.createClient();
 

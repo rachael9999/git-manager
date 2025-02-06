@@ -1,5 +1,5 @@
 const redisClient = require('./redisClient');
-const { logger } = require('../logger/winstonConfig');
+const { logger } = require('../utils/logger/winstonConfig');
 
 
 const CACHE_TTL = {
@@ -10,7 +10,7 @@ const CACHE_TTL = {
 
 const defaultTTL = 3600;
 
-async function getPageFromCache(redisKey) {
+async function getValueFromCache(redisKey) {
   const data = await redisClient.get(redisKey);
   return data ? JSON.parse(data) : null;
 }
@@ -23,15 +23,17 @@ async function getSessionLastPage(redisKey) {
 
 async function setSessionLastPage(redisKey, lastPage) {
   await redisClient.setEx(redisKey, CACHE_TTL.users, lastPage);
+  logger.info(`Session last page set for ${redisKey}`);
 }
 
-async function cachePage(redisKey, data) {
+async function cacheValue(redisKey, data) {
   await redisClient.setEx(redisKey, 3600, JSON.stringify(data));
+  logger.info(`Data cached for ${redisKey}`);
 }
 
 module.exports = {
-  getPageFromCache,
+  getValueFromCache,
   setSessionLastPage,
   getSessionLastPage,
-  cachePage
+  cacheValue
 };
