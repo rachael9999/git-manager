@@ -1,15 +1,13 @@
 const { CACHE_TTL } = require('./constants/cache_ttl');
 const redisClient = require('./redisClient');
-const {logger} = require('../utils/logger/winstonConfig');
+const { logger } = require('../utils/logger/winstonConfig');
+const cacheManager = require('./cacheManager');
 
 function cacheMiddlewareRepo(_ttl = 3600) {
   return async (req, res, next) => {
     const page = parseInt(req.query.page) || 1;
     const apiPath = req.baseUrl.substring(1); // remove leading slash
 
-    // repositories/full: key: const cacheKey = `detail_repo_${repoId}`;
-    // repositories/details/id key: const cacheKey = `repositories_page_${page}`;
-    // console.log(req.path);
     let cacheKey;
     let sessionId = req.session.id;
     if (apiPath !== 'repositories') {
@@ -22,7 +20,7 @@ function cacheMiddlewareRepo(_ttl = 3600) {
     }
 
     try {
-      const ttl = CACHE_TTL[apiPath] || _ttl;
+      const ttl = CACHE_TTL.users || _ttl;
       // Record session's last access for this API
       if (req.path.startsWith('/full')) {
         await redisClient.setEx(
@@ -32,10 +30,13 @@ function cacheMiddlewareRepo(_ttl = 3600) {
         );
       }
 
-      const cachedData = await redisClient.get(cacheKey);
+      const cachedData = await cacheManager.getCacheValue(cacheKey);
       if (cachedData) {
         logger.info(`Cache hit for ${cacheKey}`);
-        return res.json(JSON.parse(cachedData));
+        if (cachedData.status === 404) {
+          return res.status(404).json({ error: cachedData.error });
+        }
+        return res.json(cachedData.data);
       }
 
       logger.info(`Cache miss for ${cacheKey}`);

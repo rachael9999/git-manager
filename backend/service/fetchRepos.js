@@ -1,7 +1,8 @@
 const axios = require('axios');
-const {logger} = require('../utils/logger/winstonConfig');
+const { logger } = require('../utils/logger/winstonConfig');
 const cache = require('../redis/cacheManager');
 const { splitPage } = require('../utils/splitPage');
+const { CACHE_TTL } = require('../redis/constants/cache_ttl');
 
 async function fetchRepositories(since = 0, requestedPage = 1, sessionId = null) {
   try {
@@ -15,9 +16,10 @@ async function fetchRepositories(since = 0, requestedPage = 1, sessionId = null)
     // get the last id from the last page
     if (requestedPage > 1) {
       const prevPageKey = `${apiPath}_page_${requestedPage - 1}`;
-      const lastPage = await cache.getValueFromCache(prevPageKey);
-      if (lastPage) {
-        sinceId = lastPage[lastPage.length - 1].id;
+      const lastPage = await cache.getCacheValue(prevPageKey);
+      const lastPageData = lastPage.data;
+      if (lastPageData) {
+        sinceId = lastPageData[lastPageData.length - 1].id;
       } else {
         const sessionKey = `session_${sessionId}_${apiPath}_last_page`;
         const sessionPage = await cache.getSessionLastPage(sessionKey);
@@ -60,7 +62,10 @@ async function fetchRepositories(since = 0, requestedPage = 1, sessionId = null)
     
     for (let i = 0; i < pages.length; i++) {
       const pageKey = `${apiPath}_page_${startPage + i}`;
-      await cache.cacheValue(pageKey, pages[i]);
+      await cache.setCacheValue(pageKey, {
+        status: 200,
+        data: pages[i]
+      }, CACHE_TTL.repositories);
     }
 
     // Update session last page
@@ -68,7 +73,7 @@ async function fetchRepositories(since = 0, requestedPage = 1, sessionId = null)
     await cache.setSessionLastPage(sessionKey, requestedPage);
 
     const currentPageKey = `${apiPath}_page_${requestedPage}`;
-    return await cache.getValueFromCache(currentPageKey);
+    return await cache.getCacheValue(currentPageKey);
   } catch (error) {
     logger.error('Repository fetch error:', error);
     throw error;
@@ -76,10 +81,8 @@ async function fetchRepositories(since = 0, requestedPage = 1, sessionId = null)
 }
 
 async function fetchRepoDetail(repoId) {
-  if (!repoId) {
-    logger.error('Repository detail fetch error: No repoId provided');
-    return null;
-  }
+  const cacheKey = `detail_repo_${repoId}`;
+  
   try {
     const response = await axios.get(`https://api.github.com/repositories/${repoId}`, {
       headers: {
@@ -89,17 +92,25 @@ async function fetchRepoDetail(repoId) {
       proxy: false
     });
 
-    // save the data to cache
-    // const cacheKey = `detail_repo_${repoId}`;
-    const cacheKey = `detail_repo_${repoId}`;
-    await cache.cacheValue(cacheKey, response.data);
-
+    const cacheData = {
+      status: 200,
+      data: response.data
+    };
+    
+    await cache.setCacheValue(cacheKey, cacheData, CACHE_TTL.repositories);
     return response.data;
+
   } catch (error) {
-    logger.error('Repository detail fetch error:', error);
+    if (error.response?.status === 404) {
+      // Cache negative result
+      const negativeCache = {
+        status: 404,
+        error: 'Repository not found'
+      };
+      await cache.setCacheValue(cacheKey, negativeCache, CACHE_TTL.negative || 600); // 10 minutes
+    }
     throw error;
   }
 }
-
 
 module.exports = { fetchRepositories, fetchRepoDetail };

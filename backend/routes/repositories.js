@@ -24,21 +24,21 @@ router.get('/detail/:id', async (req, res) => {
     logger.info(`Fetching repo detail with id: ${req.params.id}`);
     
     if (!req.params.id) {
-        logger.error('No repository ID provided');
-        return res.status(400).json({ error: 'Repository ID is required' });
+      logger.error('No repository ID provided');
+      return res.status(400).json({ error: 'Repository ID is required' });
     }
 
     const repoDetail = await fetchRepoDetail(req.params.id);
     
     if (!repoDetail) {
-        logger.error(`No repository found with id: ${req.params.id}`);
-        return res.status(404).json({ error: 'Repository not found' });
+      logger.error(`No repository found with id: ${req.params.id}`);
+      return res.status(404).json({ error: 'Repository not found' });
     }
 
     res.json(repoDetail);
   } catch (error) {
-    logger.error(`Error fetching repository detail: ${error.message}`);
-    res.status(500).json({ error: 'Failed to fetch repository detail' });
+    logger.error(`No repository found with id: ${req.params.id}`);
+    return res.status(404).json({ error: 'Repository not found' });
   }
 });
 

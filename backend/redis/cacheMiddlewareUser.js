@@ -1,17 +1,12 @@
 const { CACHE_TTL } = require('./constants/cache_ttl');
 const redisClient = require('./redisClient');
 const { logger } = require('../utils/logger/winstonConfig');
+const cacheManager = require('./cacheManager');
 
 function cacheMiddlewareUser(_ttl = 3600) {
   return async (req, res, next) => {
     const apiPath = req.baseUrl.substring(1);
     const pathParts = req.path.split('/').filter(part => part.length > 0);
-    
-    logger.debug('Path analysis:', {
-      fullPath: req.path,
-      pathParts: pathParts,
-      baseUrl: req.baseUrl
-    });
     const username = pathParts[0];
 
     if (apiPath !== 'user') {
@@ -24,8 +19,15 @@ function cacheMiddlewareUser(_ttl = 3600) {
       try {
         const cachedValue = await redisClient.get(cacheKey);
         if (cachedValue) {
+          const parsed = JSON.parse(cachedValue);
           logger.info(`Cache hit for ${cacheKey}`);
-          return res.json(JSON.parse(cachedValue));
+          
+          if (parsed.status === 404) {
+            return res.status(404).json({ error: parsed.error });
+          }
+          
+          await redisClient.updateTime(cacheKey, _ttl);
+          return res.json(parsed.data);
         }
         logger.info(`Cache miss for ${cacheKey}`);
         return next();
@@ -46,10 +48,22 @@ function cacheMiddlewareUser(_ttl = 3600) {
 
       const cacheKey = `user_repos_${username}_${page}`;
       try {
-        const cachedValue = await redisClient.get(cacheKey);
+        const cachedValue = await cacheManager.getCacheValue(cacheKey);
         if (cachedValue) {
           logger.info(`Cache hit for ${cacheKey}`);
-          return res.json(JSON.parse(cachedValue));
+          
+          // Update TTL
+          await redisClient.updateTime(cacheKey, _ttl);
+
+          // Handle different response types
+          if (cachedValue.status === 303) {
+            return res.status(303).json(cachedValue);
+          }
+          if (cachedValue.status === 404) {
+            return res.status(404).json({ error: cachedValue.error });
+          }
+          
+          return res.json(cachedValue.data);
         }
         logger.info(`Cache miss for ${cacheKey}`);
         return next();
@@ -57,10 +71,9 @@ function cacheMiddlewareUser(_ttl = 3600) {
         logger.error('Cache middleware error:', error);
         return next();
       }
-    
     }
 
-    next();
+    return next();
   };
 }
 
