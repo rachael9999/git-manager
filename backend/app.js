@@ -37,4 +37,8 @@ app.use('/repositories', cacheMiddlewareRepo(3600), repositoriesRouter);
 
 app.use('/user', cacheMiddlewareUser(3600), userRouter);
 
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not Found' });
+});
+
 module.exports = app;
