@@ -1,0 +1,203 @@
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache miss for detail_repo_1"}
+{"level":"info","message":"Fetching repo detail with id: 1"}
+{"level":"info","message":"Data cached for detail_repo_1"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache miss for repositories_page_1"}
+{"level":"info","message":"Data cached for repositories_page_1"}
+{"level":"info","message":"Data cached for repositories_page_2"}
+{"level":"info","message":"Data cached for repositories_page_3"}
+{"level":"info","message":"Data cached for repositories_page_4"}
+{"level":"info","message":"Data cached for repositories_page_5"}
+{"level":"info","message":"Data cached for repositories_page_6"}
+{"level":"info","message":"Data cached for repositories_page_7"}
+{"level":"info","message":"Data cached for repositories_page_8"}
+{"level":"info","message":"Data cached for repositories_page_9"}
+{"level":"info","message":"Data cached for repositories_page_10"}
+{"level":"info","message":"Session last page set for session_il7uFwCLF-8NhFuIYBtrwJWNLFNHPIL1_repositories_last_page"}
+{"level":"info","message":"Cache hit for repositories_page_1"}
+{"level":"info","message":"Cache miss for detail_repo_1"}
+{"level":"info","message":"Fetching repo detail with id: 1"}
+{"level":"info","message":"Data cached for detail_repo_1"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache miss for undefined"}
+{"level":"info","message":"Cache miss for undefined"}
+{"level":"info","message":"Data cached for user_mojombo"}
+{"level":"info","message":"Data cached for user_repos_mojombo_1"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache hit for user_repos_mojombo_1"}
+{"level":"info","message":"User mojombo not found in cache"}
+{"level":"info","message":"User mojombo not found in cache"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"User mojombo not found in cache"}
+{"level":"info","message":"User mojombo not found in cache"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"User mojombo not found in cache"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"User mojombo not found in cache"}
+{"level":"info","message":"Cache miss for user_mojombo"}
+{"level":"info","message":"Data cached for user_mojombo"}
+{"level":"info","message":"User mojombo not found in cache"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"User mojombo not found in cache"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"User mojombo not found in cache"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"User mojombo not found"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"User mojombo not found"}
+{"level":"info","message":"Cache miss for user_mojombo"}
+{"level":"info","message":"Data cached for user_mojombo"}
+{"level":"info","message":"User mojombo found, page 1 not found"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"User mojombo found, page 1 not found"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"User mojombo found, page 1 not found"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache miss for user_repos_mojombo_1"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache miss for user_repos_mojombo_1"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache miss for user_repos_mojombo_1"}
+{"level":"info","message":"Cache miss for user_repos_mojombo_1"}
+{"level":"info","message":"Fetching user repos for mojombo, page 1"}
+{"level":"info","message":"Data cached for user_repos_mojombo_1"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache hit for user_repos_mojombo_1"}
+{"level":"info","message":"Cache hit for user_repos_mojombo_1"}
+{"level":"info","message":"Cache hit for user_repos_mojombo_1"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache miss for user_repos_mojombo_4"}
+{"level":"info","message":"Fetching user repos for mojombo, page 1"}
+{"level":"info","message":"Cache miss for user_repos_mojombo_4"}
+{"level":"info","message":"Fetching user repos for mojombo, page 1"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache miss for user_repos_mojombo_4"}
+{"level":"info","message":"Fetching user repos for mojombo, page 1"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache miss for user_repos_mojombo_4"}
+{"level":"info","message":"Fetching user repos for mojombo, page 1"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache middleware for user repos, page:"}
+{"level":"info","message":"Cache miss for user_repos_mojombo_4"}
+{"level":"info","message":"Fetching user repos for mojombo, page 1"}
+{"level":"info","message":"Cache middleware for user repos, page:"}
+{"level":"info","message":"Cache miss for user_repos_mojombo_4"}
+{"level":"info","message":"Fetching user repos for mojombo, page 1"}
+{"level":"info","message":"Cache middleware for user repos, page:"}
+{"level":"info","message":"Cache hit for user_repos_mojombo_1"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Fetching user repos for mojombo, page 1"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache middleware for user repos, page:"}
+{"level":"info","message":"Cache miss for user_repos_repos_1"}
+{"level":"info","message":"Fetching user repos for mojombo, page 1"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache middleware for user repos, page:"}
+{"level":"info","message":"Cache miss for user_repos_1_1"}
+{"level":"info","message":"Fetching user repos for mojombo, page 1"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache middleware for user repos, page:"}
+{"level":"info","message":"Cache hit for user_repos_mojombo_1"}
+{"level":"info","message":"Cache middleware for user repos, page:"}
+{"level":"info","message":"Cache miss for user_repos_mojombo_4"}
+{"level":"info","message":"Fetching user repos for mojombo, page 1"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache middleware for user repos, page:"}
+{"level":"info","message":"Cache miss for user_repos_mojombo_4"}
+{"level":"info","message":"Fetching user repos for mojombo, page NaN"}
+{"level":"info","message":"Data cached for user_repos_mojombo_1"}
+{"level":"info","message":"Data cached for user_repos_mojombo_2"}
+{"level":"info","message":"Data cached for user_repos_mojombo_3"}
+{"level":"info","message":"Data cached for user_repos_mojombo_max"}
+{"level":"info","message":"User repos fetched for mojombo, 3 pages"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache middleware for user repos, page:"}
+{"level":"info","message":"Cache miss for user_repos_mojombo_4"}
+{"level":"info","message":"Fetching user repos for mojombo, page 4"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache middleware for user repos, page:"}
+{"level":"info","message":"Cache miss for user_repos_mojombo_4"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache middleware for user repos, page:"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache middleware for user repos, page:"}
+{"level":"info","message":"Cache miss for user_repos_mojombo_4"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Connected to Redis"}
+{"level":"info","message":"Cache middleware for mojombo's repos, page: 4"}
+{"level":"info","message":"Cache miss for user_repos_mojombo_4"}

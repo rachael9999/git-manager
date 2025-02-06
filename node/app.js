@@ -4,9 +4,11 @@ const dotenv = require('dotenv');
 const session = require('express-session');
 const { createClient } = require('redis');
 const RedisStore = require('connect-redis').default;
-const cacheMiddleware = require('./redis/cacheMiddleware');
+const cacheMiddlewareRepo = require('./redis/cacheMiddlewareRepo');
+const cacheMiddlewareUser = require('./redis/cacheMiddlewareUser');
 const cors = require('cors');
 const repositoriesRouter = require('./routes/repositories');
+const userRouter = require('./routes/user');
 
 dotenv.config();
 
@@ -31,6 +33,8 @@ app.use(session({
 }));
 
 // Use repositories route with cache middleware
-app.use('/repositories', cacheMiddleware(3600), repositoriesRouter);
+app.use('/repositories', cacheMiddlewareRepo(3600), repositoriesRouter);
+
+app.use('/user', cacheMiddlewareUser(3600), userRouter);
 
 module.exports = app;
