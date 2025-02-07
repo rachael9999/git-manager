@@ -33,6 +33,12 @@ const routes = [
     path: '/search',
     name: 'Search',
     component: Search
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    // create 404 page later
+    component: () => import('../components/Home.vue') 
   }
 ];
 

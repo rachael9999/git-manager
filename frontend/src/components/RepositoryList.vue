@@ -36,7 +36,7 @@ export default {
     async fetchRepositories() {
       this.loading = true;
       try {
-        const response = await axios.get(`/repositories/full?page=${this.page}`);
+        const response = await axios.get(`/api/repositories/full?page=${this.page}`);
         this.repositories = response.data;
         console.log('Fetched repositories:', this.repositories);
       } catch (error) {
