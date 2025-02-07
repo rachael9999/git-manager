@@ -66,7 +66,6 @@ async function fetchUserRepos(username, page = 1) {
       proxy: false
     });
     const pages = splitPage(response.data);
-    console.log('pages:', pages);
     
     // Cache each valid page
     for (let i = 0; i < pages.length; i++) {
@@ -91,8 +90,7 @@ async function fetchUserRepos(username, page = 1) {
       await cache.setCacheValue(cacheKey, redirectData, CACHE_TTL.negative);
       return redirectData;
     }
-    const res = cache.getCacheValue(`user_repos_${username}_${page}`);
-    return res;
+    return pages[0];
   } catch (error) {
     logger.error(`User repos fetch error for ${username}:`, error);
     throw error;

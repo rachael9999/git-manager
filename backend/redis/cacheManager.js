@@ -10,8 +10,26 @@ async function getCacheValue(redisKey) {
 }
 
 async function setCacheValue(redisKey, data, ttl) {
-  await redisClient.setEx(redisKey, ttl, JSON.stringify(data));
-  logger.info(`Data cached for ${redisKey}`);
+  try {
+    if (!redisKey || typeof redisKey !== 'string') {
+      throw new Error(`Invalid redisKey: ${redisKey}`);
+    }
+    if (!data) {
+      throw new Error('Data is required');
+    }
+    await redisClient.setEx(redisKey, ttl, JSON.stringify(data));
+    logger.info(`Data cached for ${redisKey}`);
+  } catch (error) {
+    logger.error('Redis setEx error:', {
+      redisKey,
+      ttl,
+      data,
+      error
+    });
+    throw error;
+  }
+  
+  
 }
 
 async function getSessionLastPage(redisKey) {
@@ -20,14 +38,55 @@ async function getSessionLastPage(redisKey) {
 }
 
 async function setSessionLastPage(redisKey, page) {
-  await redisClient.setEx(redisKey, CACHE_TTL.sessions, JSON.stringify(page));
-  logger.info(`Session last page cached for ${redisKey}`);
+
+  // Ensure all parameters are defined and of correct type
+  if (!redisKey || typeof redisKey !== 'string') {
+    throw new Error(`Invalid redisKey: ${redisKey}`);
+  }
+
+  const pageValue = String(page || 1);
+
+  try {
+    await redisClient.setEx(
+      redisKey,
+      CACHE_TTL.sessions, 
+      pageValue
+    );
+    logger.info(`Session last page cached for ${redisKey}`);
+  } catch (error) {
+    logger.error('Redis setEx error:', {
+      redisKey,
+      ttl: CACHE_TTL.sessions,
+      pageValue,
+      error
+    });
+    throw error;
+  }
 }
 
 async function setUserRepoMaxPageCount(username, maxPage) {
   const redisKey = `user_repos_${username}_max_page`;
-  await redisClient.setEx(redisKey, defaultTTL, maxPage);
-  logger.info(`Max page count cached for ${redisKey}`);
+
+  try {
+    if (!username || typeof username !== 'string') {
+      throw new Error(`Invalid username: ${username}`);
+    }
+    if (!maxPage || typeof maxPage !== 'number') {
+      throw new Error(`Invalid maxPage: ${maxPage}`);
+    }
+
+    await redisClient.setEx(redisKey, defaultTTL, maxPage);
+    logger.info(`Max page count cached for ${redisKey}`);
+  } catch (error) {
+    logger.error('Redis setEx error:', {
+      redisKey,
+      ttl: defaultTTL,
+      maxPage,
+      error
+    });
+    throw error;
+  }
+
 }
 
 async function getUserRepoMaxPageCount(username) {

@@ -10,6 +10,11 @@ async function fetchRepositories(since = 0, requestedPage = 1, sessionId = null)
 
     let sinceId = 0;
 
+    if (requestedPage === undefined || requestedPage === null) {
+      console.warn("requestedPage is undefined or null in fetchRepositories.  Defaulting to 1.");
+      requestedPage = 1; 
+    }
+
     // check if the requested page - 1 is already cached
     // if yes, get the last id from the last page
     // if not, get the last page from the session
@@ -71,9 +76,7 @@ async function fetchRepositories(since = 0, requestedPage = 1, sessionId = null)
     // Update session last page
     const sessionKey = `session_${sessionId}_${apiPath}_last_page`;
     await cache.setSessionLastPage(sessionKey, requestedPage);
-
-    const currentPageKey = `${apiPath}_page_${requestedPage}`;
-    return await cache.getCacheValue(currentPageKey);
+    return pages[0];
   } catch (error) {
     logger.error('Repository fetch error:', error);
     throw error;
