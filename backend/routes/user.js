@@ -38,16 +38,16 @@ router.get('/:username/repos/:page', async (req, res) => {
       const repos = await fetchUserRepos(username, page);
 
       if (repos.status === 303) {
-          return res.status(303).json(repos);
+        return res.status(303).json(repos);
       }
       if (repos.status === 404) {
-          return res.status(404).json({ error: repos.error });
+        return res.status(404).json({ error: repos.error });
       }
 
       return res.json(repos.data || repos);
     } catch (error) {
       if (error.response?.status === 404) {
-          return res.status(404).json({ error: 'User not found' });
+        return res.status(404).json({ error: 'User not found' });
       }
       throw error;
     }

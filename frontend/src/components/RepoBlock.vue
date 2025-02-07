@@ -63,12 +63,17 @@
             variant="flat"
           >
             <span class="built-by-text">Built by</span>
-            <a :href="repo.owner.html_url" target="_blank" class="owner-link">
-              <v-avatar size="16" class="ml-1">
-                <v-img :src="repo.owner.avatar_url" :alt="repo.owner.login"></v-img>
-              </v-avatar>
-              <span class="ml-1">{{ repo.owner.login }}</span>
-            </a>
+            <UserPopover 
+              :username="repo.owner.login"
+              :basicInfo="repo.owner"
+            >
+              <a :href="repo.owner.html_url" target="_blank" class="owner-link">
+                <v-avatar size="16" class="ml-1">
+                  <v-img :src="repo.owner.avatar_url" :alt="repo.owner.login"></v-img>
+                </v-avatar>
+                <span class="ml-1">{{ repo.owner.login }}</span>
+              </a>
+            </UserPopover>
           </v-chip>
 
         </div>
@@ -79,7 +84,11 @@
 </template>
 
 <script>
+import UserPopover from './UserPopover.vue';
 export default {
+  components: {
+    UserPopover
+  },
   props: {
     repo: {
       type: Object,
@@ -96,7 +105,6 @@ export default {
         TypeScript: '#2b7489',
         Go: '#00ADD8',
         Vue: '#41b883',
-        // Add more languages as needed
       };
       return colors[this.repo.language] || '#6e7681';
     }

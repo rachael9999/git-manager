@@ -25,19 +25,32 @@ async function fetchUserProfile(username) {
       proxy: false
     });
 
+    const filteredData = {
+      id: response.data.id,
+      login: response.data.login,
+      name: response.data.name,
+      avatar_url: response.data.avatar_url,
+      followers: response.data.followers,
+      following: response.data.following,
+      location: response.data.location,
+      company: response.data.company,
+      email: response.data.email,
+      blog: response.data.blog
+    };
+
     const cacheData = {
       status: 200,
-      data: response.data
+      data: filteredData
     };
-    await cache.setCacheValue(cacheKey, cacheData, CACHE_TTL.users);
-    return response.data;
+    cache.setCacheValue(cacheKey, cacheData, CACHE_TTL.users).catch(err => logger.error('Cache set error:', err));
+    return filteredData;
   } catch (error) {
     if (error.response?.status === 404) {
       const negativeCache = {
         status: 404,
         error: 'User not found'
       };
-      await cache.setCacheValue(cacheKey, negativeCache, CACHE_TTL.negative);
+      cache.setCacheValue(cacheKey, negativeCache, CACHE_TTL.negative).catch(err => logger.error('Cache set error:', err));
     }
     throw error;
   }
@@ -65,19 +78,41 @@ async function fetchUserRepos(username, page = 1) {
       },
       proxy: false
     });
-    const pages = splitPage(response.data);
+
+    const filteredRepos = response.data.map(repo => ({
+      id: repo.id,
+      name: repo.name,
+      full_name: repo.full_name,
+      description: repo.description,
+      html_url: repo.html_url,
+      language: repo.language,
+      stargazers_count: repo.stargazers_count,
+      forks_count: repo.forks_count,
+      watchers_count: repo.watchers_count,
+      visibility: repo.visibility,
+      archived: repo.archived,
+      disabled: repo.disabled,
+      owner: {
+        login: repo.owner.login,
+        id: repo.owner.id,
+        avatar_url: repo.owner.avatar_url,
+        html_url: repo.owner.html_url
+      }
+    }));
+
+    const pages = splitPage(filteredRepos);
     
     // Cache each valid page
     for (let i = 0; i < pages.length; i++) {
       const pageKey = `user_repos_${username}_${i + 1}`;
-      await cache.setCacheValue(pageKey, {
+      cache.setCacheValue(pageKey, {
         status: 200,
         data: pages[i]
-      }, CACHE_TTL.users);
+      }, CACHE_TTL.users).catch(err => logger.error('Cache set error:', err));
     }
 
     // Cache max page number
-    await cache.setUserRepoMaxPageCount(username, pages.length);
+    cache.setUserRepoMaxPageCount(username, pages.length).catch(err => logger.error('Cache set error:', err));
     logger.info(`User repos fetched for ${username}, ${pages.length} pages`);
 
     // Handle invalid page number
@@ -87,7 +122,7 @@ async function fetchUserRepos(username, page = 1) {
         redirect: true, 
         page: 1 
       };
-      await cache.setCacheValue(cacheKey, redirectData, CACHE_TTL.negative);
+      cache.setCacheValue(cacheKey, redirectData, CACHE_TTL.negative).catch(err => logger.error('Cache set error:', err));
       return redirectData;
     }
     return pages[0];

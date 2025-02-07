@@ -14,7 +14,7 @@ function cacheMiddlewareUser(_ttl = 3600) {
     }
 
     // Handle user profile route
-    if (pathParts.length === 2) {
+    if (pathParts.length === 1) {
       const cacheKey = `user_${username}`;
       try {
         const cachedValue = await cacheManager.getCacheValue(cacheKey);
