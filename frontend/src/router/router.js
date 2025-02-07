@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import RepositoryList from '../components/RepositoryList.vue';
+import RepoDetail from '../components/RepoDetail.vue';
 import Search from '../components/Search.vue';
 
 const routes = [
@@ -28,6 +29,12 @@ const routes = [
     redirect: to => {
       return { path: '/repositories/full', query: { page: to.params.page } }
     }
+  },
+  {
+    path: '/repositories/:id',
+    name: 'RepositoryDetail',
+    component: RepoDetail,
+    props: true
   },
   {
     path: '/search',

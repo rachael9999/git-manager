@@ -3,11 +3,7 @@
     <h1>Repository List</h1>
     <div v-if="loading">Loading...</div>
     <div v-else>
-      <div v-for="repo in repositories" :key="repo.id" class="repo-block">
-        <h2>{{ repo.name }}</h2>
-        <p>{{ repo.description }}</p>
-        <a :href="repo.html_url" target="_blank">View on GitHub</a>
-      </div>
+      <RepoBlock v-for="repo in repositories" :key="repo.id" :repo="repo" />
       <div class="pagination">
         <button @click="prevPage" :disabled="page === 1">Previous</button>
         <button v-for="n in totalPages" :key="n" @click="goToPage(n)" :class="{ active: n === page }">{{ n }}</button>
@@ -19,8 +15,12 @@
 
 <script>
 import axios from 'axios';
+import RepoBlock from './RepoBlock.vue';
 
 export default {
+  components: {
+    RepoBlock
+  },
   props: ['page'],
   data() {
     return {
@@ -38,7 +38,12 @@ export default {
       try {
         const response = await axios.get(`/api/repositories/full?page=${this.page}`);
         this.repositories = response.data;
-        console.log('Fetched repositories:', this.repositories);
+        // for each repo in the response, request detail
+        for (let repo of this.repositories) {
+          // http://localhost:3000/repositories/detail/1
+          const detail = await axios.get(`/api/repositories/detail/${repo.id}`);
+          Object.assign(repo, detail.data);
+        }
       } catch (error) {
         console.error('Failed to fetch repositories:', error);
       } finally {
@@ -66,11 +71,6 @@ export default {
 </script>
 
 <style scoped>
-.repo-block {
-  border: 1px solid #ccc;
-  padding: 16px;
-  margin-bottom: 16px;
-}
 .pagination {
   display: flex;
   justify-content: center;

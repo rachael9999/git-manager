@@ -28,7 +28,6 @@ redisClient.connect().catch(console.error);
 
 // Session configuration
 app.use(session({
-  store: new RedisStore({ client: redisClient }),
   secret: process.env.SESSION_SECRET || 'git',
   resave: false,
   saveUninitialized: true,
