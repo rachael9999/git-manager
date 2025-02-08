@@ -1,6 +1,5 @@
 <template>
   <v-container>
-    <!-- Styled header with divider -->
     <div class="d-flex align-center mb-6">
       <h1 class="text-h4 font-weight-medium pl-4">Repository List</h1>
     </div>
@@ -25,14 +24,14 @@
       <div class="pagination">
         <button @click="prevPage" :disabled="page === 1">Previous</button>
         <button 
-          v-for="n in totalPages" 
+          v-for="n in displayedPages" 
           :key="n" 
           @click="goToPage(n)" 
           :class="{ active: n === page }"
         >
           {{ n }}
         </button>
-        <button @click="nextPage" :disabled="page === totalPages">Next</button>
+        <button @click="nextPage" :disabled="!hasMorePages">Next</button>
       </div>
     </div>
   </v-container>
@@ -52,20 +51,53 @@ export default {
       repositories: [],
       loading: true,
       loadingDetails: [],
-      totalPages: 10 
+      currentPageSet: 1, 
+      hasMorePages: true, 
+      pageSize: 10, 
+      pagesPerSet: 10 
     };
   },
-  watch: {
-    page: 'fetchRepositories'
+
+  computed: {
+    displayedPages() {
+      const current = parseInt(this.page);
+      const beforeDelta = 4; 
+      const afterDelta = 5;
+      const totalPages = Math.max(this.currentPageSet * this.pagesPerSet, current);
+      
+      let start = Math.max(1, current - beforeDelta);
+      let end = Math.min(totalPages, current + afterDelta);
+      
+      // Adjust start and end to always show 10 pages if possible
+      const range = end - start + 1;
+      if (range < 10) {
+        if (start === 1) {
+          end = Math.min(totalPages, start + 9);
+        } else if (end === totalPages) {
+          start = Math.max(1, end - 9);
+        }
+      }
+      
+      return Array.from(
+        { length: end - start + 1 },
+        (_, i) => start + i
+      );
+    }
   },
+
   methods: {
     async fetchRepositories() {
       this.loading = true;
       try {
-        // Get initial list with basic details
         const response = await axios.get(`/api/repositories/full?page=${this.page}`);
-        this.repositories = response.data;
+        
+        // Check if we have data and if there might be more pages
+        this.hasMorePages = response.data && response.data.length === this.pageSize;
+        this.repositories = response.data || [];
         this.loading = false;
+
+        // Update page set when necessary
+        this.currentPageSet = Math.ceil(this.page / this.pagesPerSet);
 
         // Fetch details in parallel
         const detailPromises = this.repositories.map(async (repo) => {
@@ -81,29 +113,42 @@ export default {
           }
         });
 
-        // Wait for all details to load in the background
         await Promise.all(detailPromises);
 
       } catch (error) {
         console.error('Failed to fetch repositories:', error);
+        this.loading = false;
       }
     },
+
     nextPage() {
-      if (this.page < this.totalPages) {
-        this.$router.push({ name: 'RepositoryList', params: { page: parseInt(this.page) + 1 } });
+      if (this.hasMorePages) {
+        this.$router.push({ 
+          name: 'RepositoryList', 
+          params: { page: parseInt(this.page) + 1 } 
+        });
       }
     },
+
     prevPage() {
       if (this.page > 1) {
-        this.$router.push({ name: 'RepositoryList', params: { page: parseInt(this.page) - 1 } });
+        this.$router.push({ 
+          name: 'RepositoryList', 
+          params: { page: parseInt(this.page) - 1 } 
+        });
       }
     },
+
     goToPage(page) {
       this.$router.push({ name: 'RepositoryList', params: { page } });
     }
   },
-  mounted() {
-    this.fetchRepositories();
+
+  watch: {
+    page: {
+      immediate: true,
+      handler: 'fetchRepositories'
+    }
   }
 };
 </script>
