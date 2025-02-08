@@ -9,7 +9,7 @@
     offset="10"
   >
     <template v-slot:activator="{ props }">
-      <span v-bind="props" class="user-trigger">
+      <span v-bind="props" class="user-trigger" @mouseenter="prefetchUserDetails">
         <slot></slot>
       </span>
     </template>

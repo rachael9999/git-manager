@@ -32,38 +32,6 @@ async function setCacheValue(redisKey, data, ttl) {
   
 }
 
-async function getSessionLastPage(redisKey) {
-  const lastPage = await redisClient.get(redisKey);
-  return lastPage ? JSON.parse(lastPage) : null;
-}
-
-async function setSessionLastPage(redisKey, page) {
-
-  // Ensure all parameters are defined and of correct type
-  if (!redisKey || typeof redisKey !== 'string') {
-    throw new Error(`Invalid redisKey: ${redisKey}`);
-  }
-
-  const pageValue = String(page || 1);
-
-  try {
-    await redisClient.setEx(
-      redisKey,
-      CACHE_TTL.sessions, 
-      pageValue
-    );
-    logger.info(`Session last page cached for ${redisKey}`);
-  } catch (error) {
-    logger.error('Redis setEx error:', {
-      redisKey,
-      ttl: CACHE_TTL.sessions,
-      pageValue,
-      error
-    });
-    throw error;
-  }
-}
-
 async function setUserRepoMaxPageCount(username, maxPage) {
   const redisKey = `user_repos_${username}_max_page`;
 
@@ -98,8 +66,6 @@ async function getUserRepoMaxPageCount(username) {
 module.exports = {
   getCacheValue,
   setCacheValue,
-  getSessionLastPage,
-  setSessionLastPage,
   setUserRepoMaxPageCount,
   getUserRepoMaxPageCount
 };

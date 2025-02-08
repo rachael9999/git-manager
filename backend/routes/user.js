@@ -1,6 +1,5 @@
 const express = require('express');
 const { fetchUserProfile, fetchUserRepos } = require('../service/fetchUser');
-const rateLimiter = require('../utils/rateLimiter');
 const { logger } = require('../utils/logger/winstonConfig');
 
 const router = express.Router();
@@ -8,9 +7,7 @@ const router = express.Router();
 router.get('/:username', async (req, res) => {
   try {
     const { username } = req.params;
-    const userData = await rateLimiter.schedule(async () => {
-      return await fetchUserProfile(username);
-    });
+    const userData = await fetchUserProfile(username);
     
     if (userData.status === 404) {
       return res.status(404).json({ error: userData.error });
@@ -34,9 +31,7 @@ router.get('/:username/repos/:page', async (req, res) => {
     }
     
     try {
-      const userData = await rateLimiter.schedule(async () => {
-        return await fetchUserProfile(username);
-      });
+      const userData = await fetchUserProfile(username);
       if (userData.status === 404) {
         return res.status(404).json({ error: userData.error });
       }

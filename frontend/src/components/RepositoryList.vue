@@ -63,16 +63,18 @@ export default {
       const current = parseInt(this.page);
       const beforeDelta = 4; 
       const afterDelta = 5;
-      const totalPages = Math.max(this.currentPageSet * this.pagesPerSet, current);
+      // const totalPages = Math.max(this.currentPageSet * this.pagesPerSet, current);
       
       let start = Math.max(1, current - beforeDelta);
-      let end = Math.min(totalPages, current + afterDelta);
+      // let end = Math.min(totalPages, current + afterDelta);
+      let end = current + afterDelta;
       
       // Adjust start and end to always show 10 pages if possible
       const range = end - start + 1;
       if (range < 10) {
         if (start === 1) {
-          end = Math.min(totalPages, start + 9);
+          // end = Math.min(totalPages, start + 9);
+          end = start + 9;
         } else if (end === totalPages) {
           start = Math.max(1, end - 9);
         }
@@ -116,8 +118,15 @@ export default {
         await Promise.all(detailPromises);
 
       } catch (error) {
-        console.error('Failed to fetch repositories:', error);
-        this.loading = false;
+        if (error.response && error.response.status === 404) {
+          this.$router.push({ name: 'NotFound' });
+          this.$router.replace({ path: '/repositories/full', query: { page: error.response.data.page } });
+        } else if (error.response && error.response.status === 303 && error.response.data.redirect) {
+          this.$router.replace({ path: '/repositories/full', query: { page: error.response.data.page } });
+        } else {
+          console.error('Failed to fetch repositories:', error);
+          this.loading = false;
+        }
       }
     },
 

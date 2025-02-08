@@ -1,6 +1,7 @@
 const axios = require('axios');
 const { logger } = require('../utils/logger/winstonConfig');
 const cache = require('../redis/cacheManager');
+const rateLimiter = require('../utils/rateLimiter');
 const { splitPage } = require('../utils/splitPage');
 const { CACHE_TTL } = require('../redis/constants/cache_ttl');
 
@@ -18,12 +19,13 @@ async function fetchUserProfile(username) {
     }
   }
   try {
-    const response = await axios.get(`https://api.github.com/users/${username}`, {
+    const response = await rateLimiter.schedule(() =>
+      axios.get(`https://api.github.com/users/${username}`, {
       headers: {
         Accept: 'application/vnd.github.v3+json'
       },
       proxy: false
-    });
+    }));
 
     const filteredData = {
       id: response.data.id,
@@ -72,12 +74,13 @@ async function fetchUserRepos(username, page = 1) {
       }
     }
 
-    const response = await axios.get(`https://api.github.com/users/${username}/repos`, {
+    const response = await rateLimiter.schedule(() => 
+      axios.get(`https://api.github.com/users/${username}/repos`, {
       headers: {
         Accept: 'application/vnd.github.v3+json'
       },
       proxy: false
-    });
+    }));
 
     const filteredRepos = response.data.map(repo => ({
       id: repo.id,

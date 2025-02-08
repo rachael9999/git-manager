@@ -1,6 +1,7 @@
 const axios = require('axios');
 const { logger } = require('../utils/logger/winstonConfig');
 const cache = require('../redis/cacheManager');
+const rateLimiter = require('../utils/rateLimiter');
 const { splitPage } = require('../utils/splitPage');
 const { CACHE_TTL } = require('../redis/constants/cache_ttl');
 
@@ -20,31 +21,28 @@ async function fetchRepositories(since = 0, requestedPage = 1, sessionId = null)
     // if not, get the last page from the session
     // get the last id from the last page
     if (requestedPage > 1) {
+
       const prevPageKey = `${apiPath}_page_${requestedPage - 1}`;
       const lastPage = await cache.getCacheValue(prevPageKey);
-      const lastPageData = lastPage.data;
-      if (lastPageData) {
-        sinceId = lastPageData[lastPageData.length - 1].id;
-      } else {
-        const sessionKey = `session_${sessionId}_${apiPath}_last_page`;
-        const sessionPage = await cache.getSessionLastPage(sessionKey);
-        if (sessionPage + 1 == requestedPage) {
-          sinceId = sessionPage[sessionPage.length - 1].id;
-        } else {
-          return { redirect: true, page: 1 };
-        }
+      if (!lastPage) {
+        console.warn("Requested page is not cached.  Defaulting to 1.");
+        // return status and redirect
+        return { redirect: true, page: 1 };
       }
+      const lastPageData = lastPage.data;
+      sinceId = lastPageData[lastPageData.length - 1].id;
     }
 
     // Fetch new data
-    const response = await axios.get('https://api.github.com/repositories', {
+    const response = await rateLimiter.schedule(() =>
+      axios.get('https://api.github.com/repositories', {
       headers: {
         Authorization: `Bearer ${process.env.GITHUB_PERSONAL_ACCESS_TOKEN}`,
         Accept: 'application/vnd.github.v3+json'
       },
       params: { since: sinceId, per_page: 100 },
       proxy: false
-    });
+    }));
 
     const filteredData = response.data.map(repo => ({
       id: repo.id,
@@ -74,9 +72,7 @@ async function fetchRepositories(since = 0, requestedPage = 1, sessionId = null)
     }
 
     // Update session last page
-    const sessionKey = `session_${sessionId}_${apiPath}_last_page`;
-    cache.setSessionLastPage(sessionKey, requestedPage)
-      .catch(err => logger.error('Cache set error:', err));
+    const sessionKey = `session_${sessionId}_${apiPath}_last_id`;
     return pages[0];
   } catch (error) {
     logger.error('Repository fetch error:', error);
@@ -88,13 +84,14 @@ async function fetchRepoDetail(repoId) {
   const cacheKey = `detail_repo_${repoId}`;
   
   try {
-    const response = await axios.get(`https://api.github.com/repositories/${repoId}`, {
+    const response = await rateLimiter.schedule(() =>
+      axios.get(`https://api.github.com/repositories/${repoId}`, {
       headers: {
         Authorization: `Bearer ${process.env.GITHUB_PERSONAL_ACCESS_TOKEN}`,
         Accept: 'application/vnd.github.v3+json'
       },
       proxy: false
-    });
+    }));
 
     const filteredData = {
       id: response.data.id,

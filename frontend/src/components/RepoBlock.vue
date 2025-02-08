@@ -14,48 +14,61 @@
       <v-card-text class="pa-0 mt-4">
         <div class="d-flex flex-wrap align-center">
           <v-chip
-            v-if="repo.language"
             size="medium"
             class="mr-4"
             variant="flat"
           >
+          <template v-slot:prepend>
+            <span 
+              class="language-dot"
+              v-if="repo.language"
+              :style="{ backgroundColor: languageColor }"
+            ></span>
+            <span v-else class="language-dot-placeholder"></span>
+          </template>
+
+          <!-- If language is loading, show the skeleton loader -->
+          <v-skeleton-loader v-if="repo.language === undefined" type="text" width="60"></v-skeleton-loader>
+
+          <!-- Once the data has loaded, show either the language or 'undefined' -->
+          <span v-else-if="repo.language" class="ml-2">{{ repo.language }}</span>
+          <span v-else class="ml-2">Undefined</span>
+        </v-chip>
+
+          <v-chip
+            size="medium"
+            class="mr-4 fixed-width-chip"
+            variant="flat"
+          >
             <template v-slot:prepend>
-              <span class="language-dot"></span>
+              <v-icon size="small" class="mr-1">mdi-star</v-icon>
             </template>
-            {{ repo.language }}
+            <span v-if="repo.stargazers_count !== undefined">{{ repo.stargazers_count }}</span>
+            <v-skeleton-loader v-else type="text" width="20" class="language-dot-placeholder"></v-skeleton-loader>
           </v-chip>
 
           <v-chip
             size="medium"
-            class="mr-4"
+            class="mr-4 fixed-width-chip"
             variant="flat"
           >
             <template v-slot:prepend>
-              <v-icon size="small">mdi-star</v-icon>
+              <v-icon size="medium" class="mr-1">mdi-source-fork</v-icon>
             </template>
-            {{ repo.stargazers_count }}
+            <span v-if="repo.forks_count !== undefined">{{ repo.forks_count }}</span>
+            <v-skeleton-loader v-else type="text" width="20" class="language-dot-placeholder"></v-skeleton-loader>
           </v-chip>
 
           <v-chip
             size="medium"
-            class="mr-4"
+            class="mr-4 fixed-width-chip"
             variant="flat"
           >
             <template v-slot:prepend>
-              <v-icon size="medium">mdi-source-fork</v-icon>
+              <v-icon size="medium" class="mr-1">mdi-account</v-icon>
             </template>
-            {{ repo.forks_count }}
-          </v-chip>
-
-          <v-chip
-            size="medium"
-            class="mr-4"
-            variant="flat"
-          >
-            <template v-slot:prepend>
-              <v-icon size="medium">mdi-account</v-icon>
-            </template>
-            {{ repo.subscribers_count }}
+            <span v-if="repo.subscribers_count !== undefined">{{ repo.subscribers_count }}</span>
+            <v-skeleton-loader v-else type="text" width="20" class="language-dot-placeholder"></v-skeleton-loader>
           </v-chip>
 
           <v-chip
@@ -68,10 +81,10 @@
               :basicInfo="repo.owner"
             >
               <a :href="repo.owner.html_url" target="_blank" class="owner-link">
-                <v-avatar size="16" class="ml-1">
+                <v-avatar size="16">
                   <v-img :src="repo.owner.avatar_url" :alt="repo.owner.login"></v-img>
                 </v-avatar>
-                <span class="ml-1">{{ repo.owner.login }}</span>
+                <span class="ml-2">{{ repo.owner.login }}</span>
               </a>
             </UserPopover>
           </v-chip>
@@ -105,6 +118,7 @@ export default {
         TypeScript: '#2b7489',
         Go: '#00ADD8',
         Vue: '#41b883',
+        undefined: '#6e7681'
       };
       return colors[this.repo.language] || '#6e7681';
     }
@@ -117,12 +131,21 @@ export default {
   margin: 8px 0 !important;
 }
 
-.language-dot {
+.language-dot, .language-dot-placeholder {
   width: 12px;
   height: 12px;
   border-radius: 50%;
   background-color: v-bind(languageColor);
   display: inline-block;
+}
+
+.language-dot-placeholder {
+  background-color: #e4e1e1;
+}
+
+.v-skeleton-loader {
+  height: 12px;  
+  display: inline-block; 
 }
 
 .owner-link {
@@ -154,6 +177,8 @@ export default {
   box-shadow: none;
   height: auto;
   padding: 0 8px;
+  min-width: 100px;
+  justify-content: flex-start;
 }
 
 .v-chip :deep(.v-icon.mdi-star) {
@@ -167,5 +192,9 @@ export default {
 
 .v-container {
   padding: 8px 16px;
+}
+
+.fixed-width-chip {
+  min-width: 80px;
 }
 </style>

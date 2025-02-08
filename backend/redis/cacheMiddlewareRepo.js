@@ -22,20 +22,18 @@ function cacheMiddlewareRepo(_ttl = 3600) {
 
     try {
       const ttl = CACHE_TTL.users || _ttl;
-      // Record session's last access for this API
-      if (req.path.startsWith('/full')) {
-        await cache.setSessionLastPage(
-          `session_${sessionId}_${apiPath}_last_page`,
-          page
-        );
-      }
 
       const cachedData = await cacheManager.getCacheValue(cacheKey);
       if (cachedData) {
-        logger.info(`Cache hit for ${cacheKey}`);
         if (cachedData.status === 404) {
+          await redisClient.updateTime(cacheKey, CACHE_TTL.negative);
           return res.status(404).json({ error: cachedData.error });
         }
+
+        logger.info(`Cache hit for ${cacheKey}`);
+        // Update TTL
+        await redisClient.updateTime(cacheKey, ttl);
+
         return res.json(cachedData.data);
       }
 
