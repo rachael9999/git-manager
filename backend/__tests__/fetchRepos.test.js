@@ -1,13 +1,12 @@
 const axios = require('axios');
-const cache = require('../redis/cacheManager');
-const rateLimiter = require('../utils/rateLimiter');
+const cache = require('../middleware/redis/cacheManager');
+const rateLimiter = require('../middleware/rateLimiter');
 const { fetchRepositories, fetchRepoDetail } = require('../service/fetchRepos');
-const { CACHE_TTL } = require('../redis/constants/cache_ttl');
+const { CACHE_TTL } = require('../middleware/redis/constants/cache_ttl');
 const logger = require('../utils/logger/winstonConfig');
 
-// Mock the modules
-jest.mock('../redis/cacheManager');
-jest.mock('../utils/rateLimiter');
+jest.mock('../middleware/redis/cacheManager');
+jest.mock('../middleware/rateLimiter');
 jest.mock('../utils/logger/winstonConfig');
 
 // Sample test data

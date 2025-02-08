@@ -1,13 +1,10 @@
 const Bottleneck = require('bottleneck');
-const logger = require('./logger/winstonConfig');
+const { logger } = require('../utils/logger/winstonConfig');
 
 function createRateLimiter() {
   const limiter = new Bottleneck({
     maxConcurrent: 1,
     minTime: 1000,
-    // reservoir: 60,
-    // reservoirRefreshAmount: 60,
-    // reservoirRefreshInterval: 60 * 1000 // 1 minute
   });
 
   limiter.on('failed', async (error, jobInfo) => {

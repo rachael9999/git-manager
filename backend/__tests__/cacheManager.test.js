@@ -1,8 +1,8 @@
-const redisClient = require('../redis/redisClient');
-const cacheManager = require('../redis/cacheManager');
+const redisClient = require('../middleware/redis/redisClient');
+const cacheManager = require('../middleware/redis/cacheManager');
 const { logger } = require('../utils/logger/winstonConfig');
 
-jest.mock('../redis/redisClient');
+jest.mock('../middleware/redis/redisClient');
 jest.mock('../utils/logger/winstonConfig');
 
 const mockRedisClient = redisClient;

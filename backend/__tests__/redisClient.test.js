@@ -21,7 +21,7 @@ describe('Redis Client', () => {
   });
 
   test('should initialize Redis with LRU policy', async () => {
-    const redisClient = require('../redis/redisClient');
+    const redisClient = require('../middleware/redis/redisClient');
     await redisClient.initRedis();
 
     expect(redis.createClient).toHaveBeenCalled();
@@ -33,7 +33,7 @@ describe('Redis Client', () => {
   });
 
   test('should update TTL for a key', async () => {
-    const redisClient = require('../redis/redisClient');
+    const redisClient = require('../middleware/redis/redisClient');
     await redisClient.initRedis();
     await redisClient.updateTime('testKey', 3600);
 
@@ -42,7 +42,7 @@ describe('Redis Client', () => {
   });
 
   test('should get value for a key', async () => {
-    const redisClient = require('../redis/redisClient');
+    const redisClient = require('../middleware/redis/redisClient');
     await redisClient.initRedis();
     mockRedisClient.get.mockResolvedValue('testValue');
 

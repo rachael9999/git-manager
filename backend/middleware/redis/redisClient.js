@@ -1,5 +1,5 @@
 const redis = require('redis');
-const { logger } = require('../utils/logger/winstonConfig');
+const { logger } = require('../../utils/logger/winstonConfig');
 
 // Redis configuration
 const REDIS_CONFIG = {

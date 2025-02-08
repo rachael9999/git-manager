@@ -1,13 +1,13 @@
 const request = require('supertest');
 const express = require('express');
-const cacheMiddlewareUser = require('../redis/cacheMiddlewareUser');
-const cacheManager = require('../redis/cacheManager');
-const redisClient = require('../redis/redisClient');
+const cacheMiddlewareUser = require('../middleware/redis/cacheMiddlewareUser');
+const cacheManager = require('../middleware/redis/cacheManager');
+const redisClient = require('../middleware/redis/redisClient');
 const { logger } = require('../utils/logger/winstonConfig');
 const session = require('express-session');
 
-jest.mock('../redis/cacheManager');
-jest.mock('../redis/redisClient');
+jest.mock('../middleware/redis/cacheManager');
+jest.mock('../middleware/redis/redisClient');
 jest.mock('../utils/logger/winstonConfig');
 
 const app = express();

@@ -1,9 +1,9 @@
 const axios = require('axios');
 const { logger } = require('../utils/logger/winstonConfig');
-const cache = require('../redis/cacheManager');
-const rateLimiter = require('../utils/rateLimiter');
+const cache = require('../middleware/redis/cacheManager');
+const rateLimiter = require('../middleware/rateLimiter');
 const { splitPage } = require('../utils/splitPage');
-const { CACHE_TTL } = require('../redis/constants/cache_ttl');
+const { CACHE_TTL } = require('../middleware/redis/constants/cache_ttl');
 
 async function fetchUserProfile(username) {
   const cacheKey = `user_${username}`;

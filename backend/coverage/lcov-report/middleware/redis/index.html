@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for utils/logger</title>
+    <title>Code coverage report for middleware/redis</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> utils/logger</h1>
+        <h1><a href="../../index.html">All files</a> middleware/redis</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">78.62% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>5/5</span>
+                <span class='fraction'>114/145</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">50% </span>
+                <span class="strong">73.33% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>1/2</span>
+                <span class='fraction'>44/60</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">72.22% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/0</span>
+                <span class='fraction'>13/18</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">78.32% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>5/5</span>
+                <span class='fraction'>112/143</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line medium'></div>
     <div class="pad1">
 <table class="coverage-summary">
 <thead>
@@ -79,18 +79,63 @@
 </tr>
 </thead>
 <tbody><tr>
-	<td class="file high" data-value="winstonConfig.js"><a href="winstonConfig.js.html">winstonConfig.js</a></td>
-	<td data-value="100" class="pic high">
-	<div class="chart"><div class="cover-fill cover-full" style="width: 100%"></div><div class="cover-empty" style="width: 0%"></div></div>
+	<td class="file medium" data-value="cacheManager.js"><a href="cacheManager.js.html">cacheManager.js</a></td>
+	<td data-value="72.41" class="pic medium">
+	<div class="chart"><div class="cover-fill" style="width: 72%"></div><div class="cover-empty" style="width: 28%"></div></div>
 	</td>
+	<td data-value="72.41" class="pct medium">72.41%</td>
+	<td data-value="29" class="abs medium">21/29</td>
+	<td data-value="66.66" class="pct medium">66.66%</td>
+	<td data-value="18" class="abs medium">12/18</td>
 	<td data-value="100" class="pct high">100%</td>
-	<td data-value="5" class="abs high">5/5</td>
-	<td data-value="50" class="pct medium">50%</td>
-	<td data-value="2" class="abs medium">1/2</td>
+	<td data-value="4" class="abs high">4/4</td>
+	<td data-value="72.41" class="pct medium">72.41%</td>
+	<td data-value="29" class="abs medium">21/29</td>
+	</tr>
+
+<tr>
+	<td class="file high" data-value="cacheMiddlewareRepo.js"><a href="cacheMiddlewareRepo.js.html">cacheMiddlewareRepo.js</a></td>
+	<td data-value="90.32" class="pic high">
+	<div class="chart"><div class="cover-fill" style="width: 90%"></div><div class="cover-empty" style="width: 10%"></div></div>
+	</td>
+	<td data-value="90.32" class="pct high">90.32%</td>
+	<td data-value="31" class="abs high">28/31</td>
+	<td data-value="73.33" class="pct medium">73.33%</td>
+	<td data-value="15" class="abs medium">11/15</td>
 	<td data-value="100" class="pct high">100%</td>
-	<td data-value="0" class="abs high">0/0</td>
+	<td data-value="2" class="abs high">2/2</td>
+	<td data-value="90.32" class="pct high">90.32%</td>
+	<td data-value="31" class="abs high">28/31</td>
+	</tr>
+
+<tr>
+	<td class="file high" data-value="cacheMiddlewareUser.js"><a href="cacheMiddlewareUser.js.html">cacheMiddlewareUser.js</a></td>
+	<td data-value="81.63" class="pic high">
+	<div class="chart"><div class="cover-fill" style="width: 81%"></div><div class="cover-empty" style="width: 19%"></div></div>
+	</td>
+	<td data-value="81.63" class="pct high">81.63%</td>
+	<td data-value="49" class="abs high">40/49</td>
+	<td data-value="78.26" class="pct medium">78.26%</td>
+	<td data-value="23" class="abs medium">18/23</td>
 	<td data-value="100" class="pct high">100%</td>
-	<td data-value="5" class="abs high">5/5</td>
+	<td data-value="3" class="abs high">3/3</td>
+	<td data-value="81.25" class="pct high">81.25%</td>
+	<td data-value="48" class="abs high">39/48</td>
+	</tr>
+
+<tr>
+	<td class="file medium" data-value="redisClient.js"><a href="redisClient.js.html">redisClient.js</a></td>
+	<td data-value="69.44" class="pic medium">
+	<div class="chart"><div class="cover-fill" style="width: 69%"></div><div class="cover-empty" style="width: 31%"></div></div>
+	</td>
+	<td data-value="69.44" class="pct medium">69.44%</td>
+	<td data-value="36" class="abs medium">25/36</td>
+	<td data-value="75" class="pct medium">75%</td>
+	<td data-value="4" class="abs medium">3/4</td>
+	<td data-value="44.44" class="pct low">44.44%</td>
+	<td data-value="9" class="abs low">4/9</td>
+	<td data-value="68.57" class="pct medium">68.57%</td>
+	<td data-value="35" class="abs medium">24/35</td>
 	</tr>
 
 </tbody>

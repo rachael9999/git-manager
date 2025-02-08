@@ -1,5 +1,5 @@
 const redisClient = require('./redisClient');
-const { logger } = require('../utils/logger/winstonConfig');
+const { logger } = require('../../utils/logger/winstonConfig');
 const { CACHE_TTL } = require('./constants/cache_ttl');
 
 const defaultTTL = 3600;

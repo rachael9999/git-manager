@@ -1,6 +1,6 @@
 const { CACHE_TTL } = require('./constants/cache_ttl');
 const redisClient = require('./redisClient');
-const { logger } = require('../utils/logger/winstonConfig');
+const { logger } = require('../../utils/logger/winstonConfig');
 const cacheManager = require('./cacheManager');
 
 function cacheMiddlewareUser(_ttl = 3600) {

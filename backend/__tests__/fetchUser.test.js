@@ -1,13 +1,13 @@
 const axios = require('axios');
-const cache = require('../redis/cacheManager');
-const rateLimiter = require('../utils/rateLimiter');
+const cache = require('../middleware/redis/cacheManager');
+const rateLimiter = require('../middleware/rateLimiter');
 const { fetchUserProfile, fetchUserRepos } = require('../service/fetchUser');
-const { CACHE_TTL } = require('../redis/constants/cache_ttl');
+const { CACHE_TTL } = require('../middleware/redis/constants/cache_ttl');
 const logger = require('../utils/logger/winstonConfig').logger;
 
 jest.mock('axios');
-jest.mock('../redis/cacheManager');
-jest.mock('../utils/rateLimiter');
+jest.mock('../middleware/redis/cacheManager');
+jest.mock('../middleware/rateLimiter');
 
 const sampleUserProfile = { id: 1, login: 'testUser', name: 'Test User' };
 const sampleUserRepos = [{ id: 1, name: 'repo1', owner: { login: 'user1', id: 1, avatar_url: 'url', html_url: 'url' } }, { id: 2, name: 'repo2', owner: { login: 'user2', id: 2, avatar_url: 'url', html_url: 'url' } }];
