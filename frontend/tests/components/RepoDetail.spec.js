@@ -57,4 +57,54 @@ describe('RepoDetail.vue', () => {
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain('Loading...');
   });
+
+  it('handles API errors gracefully', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    axios.get.mockRejectedValueOnce(new Error('API Error'));
+    
+    wrapper = shallowMount(RepoDetail, {
+      props: { id: 1 },
+      global: {
+        stubs: {
+          VCard: true,
+          VCardTitle: true,
+          VCardText: true,
+          VSkeletonLoader: true,
+          VDivider: true,
+          VIcon: true,
+          VChip: true
+        }
+      }
+    });
+    
+    await wrapper.vm.$nextTick();
+    
+    expect(wrapper.vm.loading).toBe(false);
+    expect(consoleError).toHaveBeenCalled();
+    
+    consoleError.mockRestore();
+  });
+
+  it('handles null repository data', async () => {
+    axios.get.mockResolvedValueOnce({ data: null });
+    
+    wrapper = shallowMount(RepoDetail, {
+      props: { id: 1 },
+      global: {
+        stubs: {
+          VCard: true,
+          VCardTitle: true,
+          VCardText: true,
+          VSkeletonLoader: true,
+          VDivider: true,
+          VIcon: true,
+          VChip: true
+        }
+      }
+    });
+    
+    await wrapper.vm.$nextTick();
+    
+    expect(wrapper.vm.repo).toBe(null);
+  });
 });

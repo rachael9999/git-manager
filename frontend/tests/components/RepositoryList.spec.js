@@ -94,4 +94,42 @@ describe('RepositoryList.vue', () => {
     await new Promise(resolve => setTimeout(resolve, 1000));
     expect(router.currentRoute.value.query.page).toBe('1');
   });
+
+  it('handles redirect response from API', async () => {
+    axios.get.mockRejectedValueOnce({
+      response: {
+        status: 303,
+        data: { redirect: true, page: '1' }
+      }
+    });
+    
+    await wrapper.vm.fetchRepositories();
+    await wrapper.vm.$nextTick();
+    
+    expect(router.currentRoute.value.fullPath).toBe('/repositories/full?page=1');
+  });
+
+  it('handles failed repository fetching', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    axios.get.mockRejectedValueOnce(new Error('Network error'));
+    
+    await wrapper.vm.fetchRepositories();
+    await wrapper.vm.$nextTick();
+    
+    expect(wrapper.vm.loading).toBe(false);
+    expect(consoleError).toHaveBeenCalled();
+    
+    consoleError.mockRestore();
+  });
+
+  it('handles empty response data', async () => {
+    axios.get.mockResolvedValueOnce({ data: null });
+    
+    await wrapper.vm.fetchRepositories();
+    await wrapper.vm.$nextTick();
+    
+    expect(wrapper.vm.repositories).toEqual([]);
+    expect(wrapper.vm.hasMorePages).toBe(null);
+  });
 });
+
