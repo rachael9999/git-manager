@@ -89,46 +89,48 @@ export default {
 
   methods: {
     async fetchRepositories() {
-      this.loading = true;
-      try {
-        const response = await axios.get(`/api/repositories/full?page=${this.page}`);
-        
-        // Check if we have data and if there might be more pages
-        this.hasMorePages = response.data && response.data.length === this.pageSize;
-        this.repositories = response.data || [];
-        this.loading = false;
+    this.loading = true;
+    this.repositories = [];
+    const minLoadingTime = 300; // 1 second minimum loading time
+    const startTime = Date.now();
 
-        // Update page set when necessary
-        this.currentPageSet = Math.ceil(this.page / this.pagesPerSet);
-
-        // Fetch details in parallel
-        const detailPromises = this.repositories.map(async (repo) => {
-          this.loadingDetails.push(repo.id);
-          try {
-            const detail = await axios.get(`/api/repositories/detail/${repo.id}`);
-            const index = this.repositories.findIndex(r => r.id === repo.id);
-            if (index !== -1) {
-              this.repositories[index] = { ...this.repositories[index], ...detail.data };
-            }
-          } finally {
-            this.loadingDetails = this.loadingDetails.filter(id => id !== repo.id);
-          }
-        });
-
-        await Promise.all(detailPromises);
-
-      } catch (error) {
-        if (error.response && error.response.status === 404) {
-          this.$router.push({ name: 'NotFound' });
-          this.$router.replace({ path: '/repositories/full', query: { page: error.response.data.page } });
-        } else if (error.response && error.response.status === 303 && error.response.data.redirect) {
-          this.$router.replace({ path: '/repositories/full', query: { page: error.response.data.page } });
-        } else {
-          console.error('Failed to fetch repositories:', error);
-          this.loading = false;
-        }
+    try {
+      const response = await axios.get(`/api/repositories/full?page=${this.page}`);
+      
+      const initialElapsedTime = Date.now() - startTime;
+      if (initialElapsedTime < minLoadingTime) {
+        await new Promise(resolve => setTimeout(resolve, minLoadingTime - initialElapsedTime));
       }
-    },
+
+      this.hasMorePages = response.data && response.data.length === this.pageSize;
+      this.repositories = response.data || [];
+      this.currentPageSet = Math.ceil(this.page / this.pagesPerSet);
+
+      const detailPromises = this.repositories.map(async (repo) => {
+        this.loadingDetails.push(repo.id);
+        try {
+          const detail = await axios.get(`/api/repositories/detail/${repo.id}`);
+          const index = this.repositories.findIndex(r => r.id === repo.id);
+          if (index !== -1) {
+            this.repositories[index] = { ...this.repositories[index], ...detail.data };
+          }
+        } finally {
+          this.loadingDetails = this.loadingDetails.filter(id => id !== repo.id);
+        }
+      });
+
+      await Promise.all(detailPromises);
+      this.loading = false;
+
+    } catch (error) {
+      if (error.response && error.response.status === 303 && error.response.data.redirect) {
+        this.$router.replace({ path: '/repositories/full', query: { page: error.response.data.page } });
+      } else {
+        console.error('Failed to fetch repositories:', error);
+      }
+      this.loading = false;
+    }
+  },
 
     nextPage() {
       if (this.hasMorePages) {
