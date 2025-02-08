@@ -14,20 +14,20 @@ function cacheMiddlewareUser(_ttl = 3600) {
     }
 
     // Handle user profile route
-    if (pathParts.length === 2) {
+    if (pathParts.length === 1) {
       const cacheKey = `user_${username}`;
       try {
-        const cachedValue = await redisClient.get(cacheKey);
+        const cachedValue = await cacheManager.getCacheValue(cacheKey);
         if (cachedValue) {
-          const parsed = JSON.parse(cachedValue);
           logger.info(`Cache hit for ${cacheKey}`);
           
-          if (parsed.status === 404) {
-            return res.status(404).json({ error: parsed.error });
+          if (cachedValue.status === 404) {
+            return res.status(404).json({ error: cachedValue.error });
           }
           
+          // Update TTL
           await redisClient.updateTime(cacheKey, _ttl);
-          return res.json(parsed.data);
+          return res.json(cachedValue.data);
         }
         logger.info(`Cache miss for ${cacheKey}`);
         return next();

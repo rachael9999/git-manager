@@ -9,12 +9,18 @@ const cacheMiddlewareUser = require('./redis/cacheMiddlewareUser');
 const cors = require('cors');
 const repositoriesRouter = require('./routes/repositories');
 const userRouter = require('./routes/user');
+const path = require('path');
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Create Redis client
 const redisClient = createClient();
@@ -22,7 +28,6 @@ redisClient.connect().catch(console.error);
 
 // Session configuration
 app.use(session({
-  store: new RedisStore({ client: redisClient }),
   secret: process.env.SESSION_SECRET || 'git',
   resave: false,
   saveUninitialized: true,
@@ -32,13 +37,24 @@ app.use(session({
   }
 }));
 
-// Use repositories route with cache middleware
 app.use('/repositories', cacheMiddlewareRepo(3600), repositoriesRouter);
 
 app.use('/user', cacheMiddlewareUser(3600), userRouter);
 
-app.use((req, res) => {
-  res.status(404).json({ error: 'Not Found' });
+// Static file serving
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../frontend/dist')));
+  
+  // Handle client-side routing
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+  });
+}
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
 });
 
 module.exports = app;

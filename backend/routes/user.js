@@ -1,5 +1,6 @@
 const express = require('express');
 const { fetchUserProfile, fetchUserRepos } = require('../service/fetchUser');
+const rateLimiter = require('../utils/rateLimiter');
 const { logger } = require('../utils/logger/winstonConfig');
 
 const router = express.Router();
@@ -7,7 +8,9 @@ const router = express.Router();
 router.get('/:username', async (req, res) => {
   try {
     const { username } = req.params;
-    const userData = await fetchUserProfile(username);
+    const userData = await rateLimiter.schedule(async () => {
+      return await fetchUserProfile(username);
+    });
     
     if (userData.status === 404) {
       return res.status(404).json({ error: userData.error });
@@ -31,23 +34,25 @@ router.get('/:username/repos/:page', async (req, res) => {
     }
     
     try {
-      const userData = await fetchUserProfile(username);
+      const userData = await rateLimiter.schedule(async () => {
+        return await fetchUserProfile(username);
+      });
       if (userData.status === 404) {
         return res.status(404).json({ error: userData.error });
       }
       const repos = await fetchUserRepos(username, page);
 
       if (repos.status === 303) {
-          return res.status(303).json(repos);
+        return res.status(303).json(repos);
       }
       if (repos.status === 404) {
-          return res.status(404).json({ error: repos.error });
+        return res.status(404).json({ error: repos.error });
       }
 
       return res.json(repos.data || repos);
     } catch (error) {
       if (error.response?.status === 404) {
-          return res.status(404).json({ error: 'User not found' });
+        return res.status(404).json({ error: 'User not found' });
       }
       throw error;
     }

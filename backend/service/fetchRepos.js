@@ -10,6 +10,11 @@ async function fetchRepositories(since = 0, requestedPage = 1, sessionId = null)
 
     let sinceId = 0;
 
+    if (requestedPage === undefined || requestedPage === null) {
+      console.warn("requestedPage is undefined or null in fetchRepositories.  Defaulting to 1.");
+      requestedPage = 1; 
+    }
+
     // check if the requested page - 1 is already cached
     // if yes, get the last id from the last page
     // if not, get the last page from the session
@@ -62,18 +67,17 @@ async function fetchRepositories(since = 0, requestedPage = 1, sessionId = null)
     
     for (let i = 0; i < pages.length; i++) {
       const pageKey = `${apiPath}_page_${startPage + i}`;
-      await cache.setCacheValue(pageKey, {
+      cache.setCacheValue(pageKey, {
         status: 200,
         data: pages[i]
-      }, CACHE_TTL.repositories);
+      }, CACHE_TTL.repositories).catch(err => logger.error('Cache set error:', err));
     }
 
     // Update session last page
     const sessionKey = `session_${sessionId}_${apiPath}_last_page`;
-    await cache.setSessionLastPage(sessionKey, requestedPage);
-
-    const currentPageKey = `${apiPath}_page_${requestedPage}`;
-    return await cache.getCacheValue(currentPageKey);
+    cache.setSessionLastPage(sessionKey, requestedPage)
+      .catch(err => logger.error('Cache set error:', err));
+    return pages[0];
   } catch (error) {
     logger.error('Repository fetch error:', error);
     throw error;
@@ -92,13 +96,42 @@ async function fetchRepoDetail(repoId) {
       proxy: false
     });
 
+    const filteredData = {
+      id: response.data.id,
+      name: response.data.name,
+      full_name: response.data.full_name,
+      description: response.data.description,
+      html_url: response.data.html_url,
+      language: response.data.language,
+      stargazers_count: response.data.stargazers_count,
+      forks_count: response.data.forks_count,
+      subscribers_count: response.data.subscribers_count,
+      visibility: response.data.visibility,
+      archived: response.data.archived,
+      disabled: response.data.disabled,
+      license: response.data.license ? {
+        name: response.data.license.name,
+        spdx_id: response.data.license.spdx_id
+      } : null,
+      owner: {
+        login: response.data.owner.login,
+        id: response.data.owner.id,
+        avatar_url: response.data.owner.avatar_url,
+        html_url: response.data.owner.html_url
+      }
+    };
+
     const cacheData = {
       status: 200,
-      data: response.data
+      data: filteredData
     };
     
-    await cache.setCacheValue(cacheKey, cacheData, CACHE_TTL.repositories);
-    return response.data;
+    cache.setCacheValue(cacheKey, cacheData, CACHE_TTL.repositories)
+      .catch(error => {
+        logger.error('Cache set error:', error);
+      });
+
+    return filteredData;
 
   } catch (error) {
     if (error.response?.status === 404) {
@@ -107,7 +140,8 @@ async function fetchRepoDetail(repoId) {
         status: 404,
         error: 'Repository not found'
       };
-      await cache.setCacheValue(cacheKey, negativeCache, CACHE_TTL.negative || 600); // 10 minutes
+      cache.setCacheValue(cacheKey, negativeCache, CACHE_TTL.negative || 600)
+        .catch(err => logger.error('Cache set error:', err)); // 10 minutes
     }
     throw error;
   }

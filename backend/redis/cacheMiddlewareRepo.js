@@ -2,6 +2,7 @@ const { CACHE_TTL } = require('./constants/cache_ttl');
 const redisClient = require('./redisClient');
 const { logger } = require('../utils/logger/winstonConfig');
 const cacheManager = require('./cacheManager');
+const cache = require('./cacheManager');
 
 function cacheMiddlewareRepo(_ttl = 3600) {
   return async (req, res, next) => {
@@ -23,10 +24,9 @@ function cacheMiddlewareRepo(_ttl = 3600) {
       const ttl = CACHE_TTL.users || _ttl;
       // Record session's last access for this API
       if (req.path.startsWith('/full')) {
-        await redisClient.setEx(
+        await cache.setSessionLastPage(
           `session_${sessionId}_${apiPath}_last_page`,
-          ttl,
-          page.toString()
+          page
         );
       }
 
