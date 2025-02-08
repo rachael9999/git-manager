@@ -1,16 +1,16 @@
 <template>
-    <div v-if="repo">
-      <h1>{{ repo.name }}</h1>
-      <p>{{ repo.description }}</p>
-      <p><strong>Owner:</strong> {{ repo.owner.login }}</p>
-      <p><strong>Stars:</strong> {{ repo.stargazers_count }}</p>
-      <p><strong>Forks:</strong> {{ repo.forks_count }}</p>
-      <p><strong>Language:</strong> {{ repo.language }}</p>
-      <p><strong>Open Issues:</strong> {{ repo.open_issues_count }}</p>
-      <a :href="repo.html_url" target="_blank">View on GitHub</a>
+    <div v-if="loading">
+      <p>Loading...</p>
     </div>
     <div v-else>
-      <p>Loading...</p>
+      <h1>{{ repo?.name }}</h1>
+      <p>{{ repo?.description }}</p>
+      <p><strong>Owner:</strong> {{ repo?.owner?.login }}</p>
+      <p><strong>Stars:</strong> {{ repo?.stargazers_count }}</p>
+      <p><strong>Forks:</strong> {{ repo?.forks_count }}</p>
+      <p><strong>Language:</strong> {{ repo?.language }}</p>
+      <p><strong>Open Issues:</strong> {{ repo?.open_issues_count }}</p>
+      <a v-if="repo?.html_url" :href="repo.html_url" target="_blank">View on GitHub</a>
     </div>
   </template>
   

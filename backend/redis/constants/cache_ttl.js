@@ -3,7 +3,8 @@ const CACHE_TTL = {
   users: 7200,          // 2 hours
   issues: 1800,         // 30 minutes
   negative: 600,        // 10 minutes
-  sessions: 86400        // 1 day
+  sessions: 86400,      // 1 day
+  REPO_DETAIL: 3600     // 1 hour
 };
 
 module.exports = {

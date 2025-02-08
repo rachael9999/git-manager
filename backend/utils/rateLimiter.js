@@ -1,23 +1,30 @@
 const Bottleneck = require('bottleneck');
+const logger = require('./logger/winstonConfig');
 
-const rateLimiter = new Bottleneck({
-  maxConcurrent: 1,
-  minTime: 1000,
-  retryCount: 3,
-  retryDelay: 1000,
-});
+function createRateLimiter() {
+  const limiter = new Bottleneck({
+    maxConcurrent: 1,
+    minTime: 1000,
+    // reservoir: 60,
+    // reservoirRefreshAmount: 60,
+    // reservoirRefreshInterval: 60 * 1000 // 1 minute
+  });
 
-rateLimiter.on('failed', async (error, jobInfo) => {
-  const { status } = error.response || {};
-  
-  if ((status === 403 || status === 429) && jobInfo.retryCount < 3) {
-    logger.warn(`Rate limit hit, retrying in ${jobInfo.retryDelay}ms (attempt ${jobInfo.retryCount + 1}/3)`);
-    return jobInfo.retryCount + 1;
-  }
-});
+  limiter.on('failed', async (error, jobInfo) => {
+    const { status } = error.response || {};
+    
+    if ((status === 403 || status === 429) && jobInfo.retryCount < 3) {
+      logger.warn(`Rate limit hit, retrying in ${jobInfo.retryDelay}ms (attempt ${jobInfo.retryCount + 1}/3)`);
+      return jobInfo.retryDelay;
+    }
+    return null;
+  });
 
-rateLimiter.on('retry', (error, jobInfo) => {
-  logger.info(`Retrying request after rate limit (attempt ${jobInfo.retryCount}/3)`);
-});
+  limiter.on('retry', (error, jobInfo) => {
+    logger.info(`Retrying request after rate limit (attempt ${jobInfo.retryCount}/3)`);
+  });
 
-module.exports = rateLimiter;
+  return limiter;
+}
+
+module.exports = createRateLimiter();

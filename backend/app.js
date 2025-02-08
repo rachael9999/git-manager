@@ -39,7 +39,7 @@ app.use(session({
 
 app.use('/repositories', cacheMiddlewareRepo(3600), repositoriesRouter);
 
-app.use('/user', cacheMiddlewareUser(3600), userRouter);
+app.use('/user', cacheMiddlewareUser(7200), userRouter);
 
 // Static file serving
 if (process.env.NODE_ENV === 'production') {

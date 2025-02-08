@@ -84,6 +84,12 @@ async function fetchRepoDetail(repoId) {
   const cacheKey = `detail_repo_${repoId}`;
   
   try {
+    // Check cache first
+    const cachedData = await cache.getCacheValue(cacheKey);
+    if (cachedData) {
+      return cachedData.data;
+    }
+
     const response = await rateLimiter.schedule(() =>
       axios.get(`https://api.github.com/repositories/${repoId}`, {
       headers: {
@@ -123,7 +129,7 @@ async function fetchRepoDetail(repoId) {
       data: filteredData
     };
     
-    cache.setCacheValue(cacheKey, cacheData, CACHE_TTL.repositories)
+    await cache.setCacheValue(cacheKey, cacheData, CACHE_TTL.REPO_DETAIL)
       .catch(error => {
         logger.error('Cache set error:', error);
       });

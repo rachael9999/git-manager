@@ -135,8 +135,8 @@ export default {
     nextPage() {
       if (this.hasMorePages) {
         this.$router.push({ 
-          name: 'RepositoryList', 
-          params: { page: parseInt(this.page) + 1 } 
+          name: 'FullRepositories', 
+          query: { page: parseInt(this.page) + 1 } 
         });
       }
     },
@@ -144,14 +144,17 @@ export default {
     prevPage() {
       if (this.page > 1) {
         this.$router.push({ 
-          name: 'RepositoryList', 
-          params: { page: parseInt(this.page) - 1 } 
+          name: 'FullRepositories', 
+          query: { page: parseInt(this.page) - 1 } 
         });
       }
     },
 
     goToPage(page) {
-      this.$router.push({ name: 'RepositoryList', params: { page } });
+      this.$router.push({ 
+        name: 'FullRepositories', 
+        query: { page } 
+      });
     }
   },
 

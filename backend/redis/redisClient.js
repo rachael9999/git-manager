@@ -7,59 +7,76 @@ const REDIS_CONFIG = {
   maxmemory: '20gb'
 };
 
-const redisClient = redis.createClient({
-  socket: {
-    host: 'localhost',
-    port: 6379
+class RedisWrapper {
+  constructor() {
+    this.client = null;
+    this.isInitialized = false;
   }
-});
 
-// Initialize Redis with LRU config
-async function initRedis() {
-  await redisClient.connect();
-  await redisClient.configSet('maxmemory-policy', REDIS_CONFIG.maxMemoryPolicy);
-  await redisClient.configSet('maxmemory', REDIS_CONFIG.maxmemory);
-  logger.info('Redis initialized with LRU policy');
-}
+  async initRedis() {
+    if (this.isInitialized) return;
 
-// Update TTL for a key
-async function updateTime(key, ttl) {
-  try {
-    await redisClient.expire(key, ttl);
-    logger.info(`Updated TTL for ${key}`);
-  } catch (error) {
-    logger.error(`Failed to update TTL for ${key}:`, error);
-    throw error;
+    this.client = redis.createClient({
+      socket: {
+        host: 'localhost',
+        port: 6379
+      }
+    });
+
+    this.client.on('error', (err) => {
+      logger.error('Redis error:', err);
+    });
+
+    await this.client.connect();
+    await this.client.configSet('maxmemory-policy', REDIS_CONFIG.maxMemoryPolicy);
+    await this.client.configSet('maxmemory', REDIS_CONFIG.maxmemory);
+    this.isInitialized = true;
+    logger.info('Redis initialized with LRU policy');
   }
-}
 
-async function get(key) {
-  try {
-    const value = await redisClient.get(key);
-    if (value) {
-      logger.debug(`Retrieved value for ${key}`);
-      return value;
+  async updateTime(key, ttl) {
+    try {
+      await this.client.expire(key, ttl);
+      logger.info(`Updated TTL for ${key}`);
+    } catch (error) {
+      logger.error(`Failed to update TTL for ${key}:`, error);
+      throw error;
     }
-    logger.debug(`No value found for ${key}`);
-    return null;
-  } catch (error) {
-    logger.error(`Failed to get value for ${key}:`, error);
-    throw error;
+  }
+
+  async get(key) {
+    try {
+      const value = await this.client.get(key);
+      if (value) {
+        logger.debug(`Retrieved value for ${key}`);
+        return value;
+      }
+      logger.debug(`No value found for ${key}`);
+      return null;
+    } catch (error) {
+      logger.error(`Failed to get value for ${key}:`, error);
+      throw error;
+    }
+  }
+
+  async set(...args) {
+    return this.client.set(...args);
+  }
+
+  async setEx(...args) {
+    return this.client.setEx(...args);
+  }
+
+  async expire(...args) {
+    return this.client.expire(...args);
   }
 }
 
-redisClient.on('error', (err) => {
-  logger.error('Redis error:', err);
-});
+const redisWrapper = new RedisWrapper();
 
-initRedis().catch(err => {
+// Initialize Redis when the module is imported
+redisWrapper.initRedis().catch(err => {
   logger.error('Redis initialization failed:', err);
 });
 
-module.exports = {
-  get,
-  updateTime,
-  set: redisClient.set.bind(redisClient),
-  setEx: redisClient.setEx.bind(redisClient),
-  expire: redisClient.expire.bind(redisClient)
-};
+module.exports = redisWrapper;

@@ -22,6 +22,7 @@ function cacheMiddlewareUser(_ttl = 3600) {
           logger.info(`Cache hit for ${cacheKey}`);
           
           if (cachedValue.status === 404) {
+            await redisClient.updateTime(cacheKey, CACHE_TTL.negative);
             return res.status(404).json({ error: cachedValue.error });
           }
           
@@ -60,6 +61,7 @@ function cacheMiddlewareUser(_ttl = 3600) {
             return res.status(303).json(cachedValue);
           }
           if (cachedValue.status === 404) {
+            await redisClient.updateTime(cacheKey, CACHE_TTL.negative);
             return res.status(404).json({ error: cachedValue.error });
           }
           
