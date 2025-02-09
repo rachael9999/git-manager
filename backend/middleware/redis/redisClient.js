@@ -4,7 +4,7 @@ const { logger } = require('../../utils/logger/winstonConfig');
 // Redis configuration
 const REDIS_CONFIG = {
   maxMemoryPolicy: 'allkeys-lru',
-  maxmemory: '20gb'
+  maxmemory: '5gb'
 };
 
 class RedisWrapper {

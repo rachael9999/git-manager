@@ -41,7 +41,7 @@ describe('cacheMiddlewareRepo', () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual(sampleData.data);
     expect(cacheManager.getCacheValue).toHaveBeenCalledWith('repositories_page_1');
-    expect(redisClient.updateTime).toHaveBeenCalledWith('repositories_page_1', 7200);
+    expect(redisClient.updateTime).toHaveBeenCalledWith('repositories_page_1', 3600);
   });
 
   test('should proceed to next middleware on cache miss for repository page', async () => {
@@ -63,7 +63,7 @@ describe('cacheMiddlewareRepo', () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual(sampleData.data);
     expect(cacheManager.getCacheValue).toHaveBeenCalledWith('detail_repo_123');
-    expect(redisClient.updateTime).toHaveBeenCalledWith('detail_repo_123', 7200);
+    expect(redisClient.updateTime).toHaveBeenCalledWith('detail_repo_123', 3600);
   });
 
   test('should proceed to next middleware on cache miss for repository detail', async () => {

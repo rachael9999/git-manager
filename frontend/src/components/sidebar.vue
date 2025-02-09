@@ -11,7 +11,7 @@
           <v-list-item
             prepend-icon="mdi-source-repository"
             title="Repositories"
-            :to="{ name: 'FullRepositories', query: { page: '1' }}"
+            :to="{ name: 'FullRepositories', query: { page: 1 }}"
           />
           <v-list-item
             prepend-icon="mdi-trending-up"
@@ -21,7 +21,7 @@
         </v-list>
       </v-navigation-drawer>
 
-      <v-main style="min-height: 100vh">
+      <v-main>
         <router-view />
       </v-main>
     </v-layout>

@@ -59,24 +59,13 @@
             <v-skeleton-loader v-else type="text" width="20" class="language-dot-placeholder"></v-skeleton-loader>
           </v-chip>
 
-          <!-- <v-chip
-            size="medium"
-            class="mr-4 fixed-width-chip"
-            variant="flat"
-          >
-            <template v-slot:prepend>
-              <v-icon size="medium" class="mr-1">mdi-account</v-icon>
-            </template>
-            <span v-if="repo.subscribers_count !== undefined">{{ repo.subscribers_count }}</span>
-            <v-skeleton-loader v-else type="text" width="20" class="language-dot-placeholder"></v-skeleton-loader>
-          </v-chip> -->
-
           <v-chip
             size="medium"
             variant="flat"
           >
             <span class="built-by-text">Built by</span>
             <UserPopover 
+              v-if="repo.owner"
               :username="repo.owner.login"
               :basicInfo="repo.owner"
             >
@@ -94,6 +83,7 @@
                 </router-link>
               </div>
             </UserPopover>
+            <v-skeleton-loader v-else type="text" width="100"></v-skeleton-loader>
           </v-chip>
 
         </div>

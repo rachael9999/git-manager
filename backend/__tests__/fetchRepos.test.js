@@ -1,7 +1,7 @@
 const axios = require('axios');
 const cache = require('../middleware/redis/cacheManager');
 const rateLimiter = require('../middleware/rateLimiter');
-const { fetchRepositories, fetchRepoDetail } = require('../service/fetchRepos');
+const { fetchRepositories, fetchRepoDetail, fetchTrendingRepositories } = require('../service/fetchRepos');
 const { CACHE_TTL } = require('../middleware/redis/constants/cache_ttl');
 const logger = require('../utils/logger/winstonConfig');
 
@@ -178,4 +178,87 @@ describe('fetchRepoDetail', () => {
         );
     });
 
+});
+
+describe('fetchTrendingRepositories', () => {
+    const sampleTrendingData = {
+        items: [
+            {
+                id: 1,
+                name: 'trending-repo',
+                full_name: 'test/trending-repo',
+                description: 'Trending test repository',
+                html_url: 'https://github.com/test/trending-repo',
+                url: 'https://api.github.com/repos/test/trending-repo',
+                stargazers_count: 1000,
+                forks_count: 100,
+                language: 'JavaScript',
+                owner: {
+                    login: 'test',
+                    id: 123,
+                    avatar_url: 'https://github.com/test.png',
+                    html_url: 'https://github.com/test'
+                }
+            }
+        ]
+    };
+
+    test('should fetch and cache trending repositories', async () => {
+        cache.getCacheValue = jest.fn().mockResolvedValue(null);
+        rateLimiter.schedule = jest.fn().mockResolvedValue({ data: sampleTrendingData });
+        cache.setCacheValue = jest.fn().mockResolvedValue(true);
+
+        const result = await fetchTrendingRepositories('week', 'JavaScript', 1);
+
+        expect(result.status).toBe(200);
+        expect(result.data[0]).toEqual({
+            id: 1,
+            name: 'trending-repo',
+            full_name: 'test/trending-repo',
+            description: 'Trending test repository',
+            html_url: 'https://github.com/test/trending-repo',
+            url: 'https://api.github.com/repos/test/trending-repo',
+            stars: 1000,
+            forks: 100,
+            language: 'JavaScript',
+            owner: {
+                login: 'test',
+                id: 123,
+                avatar_url: 'https://github.com/test.png',
+                html_url: 'https://github.com/test'
+            }
+        });
+    });
+
+    test('should return cached data when available', async () => {
+        const cachedData = {
+            status: 200,
+            data: [{
+                id: 1,
+                name: 'cached-repo',
+                stars: 500
+            }],
+            total_pages: 1
+        };
+        cache.getCacheValue = jest.fn().mockResolvedValue(cachedData);
+
+        const result = await fetchTrendingRepositories('day', null, 1);
+
+        expect(result).toEqual(cachedData);
+        expect(rateLimiter.schedule).not.toHaveBeenCalled();
+    });
+
+    test('should redirect to page 1 when requested page exceeds available pages', async () => {
+        cache.getCacheValue = jest.fn().mockResolvedValue(null);
+        rateLimiter.schedule = jest.fn().mockResolvedValue({ data: { items: [sampleTrendingData.items[0]] } });
+        cache.setCacheValue = jest.fn().mockResolvedValue(true);
+
+        const result = await fetchTrendingRepositories('day', null, 5);
+
+        expect(result).toEqual({
+            status: 303,
+            redirect: true,
+            page: 1
+        });
+    });
 });

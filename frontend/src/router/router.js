@@ -1,9 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import RepositoryList from '../components/RepositoryList.vue';
-import RepoDetail from '../components/RepoDetail.vue';
 import Home from '../components/Home.vue';
-import Search from '../components/Search.vue';
 import UserPage from '../components/UserPage.vue';
+import TrendingPage from '../components/TrendingPage.vue';
 import NotFound from '../components/errors/NotFound.vue';
 import Forbidden from '../components/errors/Forbidden.vue';
 import ServerError from '../components/errors/ServerError.vue';
@@ -23,21 +22,15 @@ const routes = [
     })
   },
   {
-    path: '/repositories/:id',
-    name: 'RepositoryDetail',
-    component: RepoDetail,
-    props: true
-  },
-  {
-    path: '/search',
-    name: 'Search',
-    component: Search
-  },
-  {
     path: '/user/:username',
     name: 'UserPage',
     component: UserPage,
     props: true
+  },
+  {
+    path: '/trending',
+    name: 'TrendingPage',
+    component: TrendingPage
   },
   // Error routes
   {

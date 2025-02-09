@@ -61,33 +61,32 @@ export default {
       // Check if we're at a page that would need the next set
       const currentSet = Math.floor((this.currentPage - 1) / 10);
       const maxSet = Math.floor((this.maxPage - 1) / 10);
-      // console.log(currentSet, maxSet);
       return currentSet >= maxSet - 1;
     },
   },
 
   methods: {
     extendPagination() {
-      const newMax = this.currentPage + 4;
-      if (this.shouldExtendPagination && newMax > this.maxPage) {
-        this.maxPage = newMax;
-        
-        if (this.shouldFetchNextSet) {
-          const nextSetStart = Math.ceil((this.currentPage) / 10) * 10 + 1;
-          this.fetchRepositories(nextSetStart);
-        }
-      }
-    },
+              const newMax = this.currentPage + 4;
+        if (this.shouldExtendPagination && newMax > this.maxPage) {
+          this.maxPage = newMax;
+          
+          if (this.shouldFetchNextSet) {
+            const nextSetStart = Math.ceil((this.currentPage) / 10) * 10 + 1;
+                          this.fetchRepositories(nextSetStart);
+            }
+          }
+            },
 
     async handlePageChange(page) {
-      this.currentPage = page;
-      this.extendPagination();
-      this.$router.push({ 
-        name: 'FullRepositories', 
-        query: { page: page } 
-      });
-      await this.fetchRepositories(page);
-    },
+              this.currentPage = page;
+        this.extendPagination();
+        this.$router.push({ 
+          name: 'FullRepositories', 
+          query: { page: page.toString() } 
+        });
+        await this.fetchRepositories(page);
+          },
 
     async fetchRepositories(page = this.currentPage) {
       this.loading = true;
@@ -98,24 +97,56 @@ export default {
       try {
         const response = await axios.get(`/api/repositories/full?page=${page}`);
         
-        if (response.data && response.data.length > 0) {
+        // Handle the response which can be either an array directly or nested under data
+        let repos;
+        if (Array.isArray(response.data)) {
+          repos = response.data;
+        } else if (response.data?.data && Array.isArray(response.data.data)) {
+          repos = response.data.data;
+        } else if (response.data?.redirect) {
+          this.$router.replace({ 
+            name: 'FullRepositories', 
+            query: { page: response.data.page || '1' }
+          });
+          return;
+        } else {
+          console.error('Unexpected response format:', response.data);
+          this.repositories = [];
+          return;
+        }
+
+        if (repos.length > 0) {
           this.extendPagination();
         }
+        
         const initialElapsedTime = Date.now() - startTime;
         if (initialElapsedTime < minLoadingTime) {
           await new Promise(resolve => setTimeout(resolve, minLoadingTime - initialElapsedTime));
         }
 
-        this.repositories = response.data || [];
+        // Make sure each repo is a valid object before setting
+        this.repositories = repos.filter(repo => repo && typeof repo === 'object');
 
+        // Fetch additional details for each repository
         const detailPromises = this.repositories.map(async (repo) => {
           this.loadingDetails.push(repo.id);
           try {
             const detail = await axios.get(`/api/repositories/detail/${repo.id}`);
-            const index = this.repositories.findIndex(r => r.id === repo.id);
-            if (index !== -1) {
-              this.repositories[index] = { ...this.repositories[index], ...detail.data };
+            const detailData = detail.data?.data || detail.data;
+            
+            // Only update if we got a valid object back
+            if (detailData && typeof detailData === 'object') {
+              const index = this.repositories.findIndex(r => r.id === repo.id);
+              if (index !== -1) {
+                const updatedRepo = { ...this.repositories[index], ...detailData };
+                // Verify the update keeps it as a valid object
+                if (typeof updatedRepo === 'object' && updatedRepo.id) {
+                  this.repositories[index] = updatedRepo;
+                }
+              }
             }
+          } catch (error) {
+            console.error(`Error fetching details for repo ${repo.id}:`, error);
           } finally {
             this.loadingDetails = this.loadingDetails.filter(id => id !== repo.id);
           }
@@ -123,13 +154,12 @@ export default {
 
         await Promise.all(detailPromises);
       } catch (error) {
-        if (error.response?.status === 303 || error.response.data.redirect) {
+        console.error('Failed to fetch repositories:', error);
+        if (error.response?.status === 303 || error.response?.data?.redirect) {
           this.$router.replace({ 
             name: 'FullRepositories', 
-            query: { page: error.response.data.page } 
+            query: { page: error.response?.data?.page || '1' }
           });
-        } else {
-          console.error('Failed to fetch repositories:', error);
         }
       } finally {
         this.loading = false;

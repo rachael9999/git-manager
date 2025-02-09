@@ -97,6 +97,10 @@ async function fetchRepoDetail(repoId) {
       proxy: false
     }));
 
+    if (!response.data || typeof response.data !== 'object') {
+      throw new Error('Invalid repository data received');
+    }
+
     const filteredData = {
       id: response.data.id,
       name: response.data.name,
@@ -114,12 +118,12 @@ async function fetchRepoDetail(repoId) {
         name: response.data.license.name,
         spdx_id: response.data.license.spdx_id
       } : null,
-      owner: {
+      owner: response.data.owner ? {
         login: response.data.owner.login,
         id: response.data.owner.id,
         avatar_url: response.data.owner.avatar_url,
         html_url: response.data.owner.html_url
-      }
+      } : null
     };
 
     const cacheData = {
@@ -127,8 +131,7 @@ async function fetchRepoDetail(repoId) {
       data: filteredData
     };
     
-    cache.setCacheValue(cacheKey, cacheData, CACHE_TTL.REPO_DETAIL);
-
+    await cache.setCacheValue(cacheKey, cacheData, CACHE_TTL.REPO_DETAIL);
     return filteredData;
 
   } catch (error) {
@@ -138,14 +141,22 @@ async function fetchRepoDetail(repoId) {
         status: 404,
         error: 'Repository not found'
       };
-      cache.setCacheValue(cacheKey, negativeCache, CACHE_TTL.negative || 600);
+      await cache.setCacheValue(cacheKey, negativeCache, CACHE_TTL.negative || 600);
     }
     throw error;
   }
 }
 
-async function fetchTrendingRepositories(period = 'week', language) {
+async function fetchTrendingRepositories(period = 'day', language, requestedPage = 1) {
+  const cacheKey = `trending_${period}_${language || 'all'}_page_${requestedPage}`;
+
   try {
+    // Check cache first
+    const cachedData = await cache.getCacheValue(cacheKey);
+    if (cachedData) {
+      return cachedData;
+    }
+
     const response = await rateLimiter.schedule(() =>
       axios.get('https://api.github.com/search/repositories', {
         headers: {
@@ -155,13 +166,14 @@ async function fetchTrendingRepositories(period = 'week', language) {
         params: {
           q: `created:>${getDate(period)}${language ? ` language:${language}` : ''}`,
           sort: 'stars',
-          order: 'desc'
+          order: 'desc',
+          per_page: 100
         },
         proxy: false
       })
     );
 
-    return response.data.items.map(repo => ({
+    const filteredData = response.data.items.map(repo => ({
       id: repo.id,
       name: repo.name,
       full_name: repo.full_name,
@@ -173,8 +185,34 @@ async function fetchTrendingRepositories(period = 'week', language) {
       },
       html_url: repo.html_url,
       description: repo.description,
-      url: repo.url
+      url: repo.url,
+      stars: repo.stargazers_count,
+      forks: repo.forks_count,
+      language: repo.language
     }));
+
+    // Split and cache pages
+    const pages = splitPage(filteredData);
+    const startPage = requestedPage;
+
+    if (requestedPage > pages.length) {
+      return { status: 303, redirect: true, page: 1 };
+    }
+
+    for (let i = 0; i < pages.length; i++) {
+      const pageKey = `trending_${period}_${language || 'all'}_page_${startPage + i}`;
+      cache.setCacheValue(pageKey, {
+        status: 200,
+        data: pages[i],
+        total_pages: pages.length
+      }, CACHE_TTL.repositories);
+    }
+
+    return {
+      status: 200,
+      data: pages[requestedPage - 1],
+      total_pages: pages.length
+    };
   } catch (error) {
     logger.error('Trending repositories fetch error:', error);
     throw error;
