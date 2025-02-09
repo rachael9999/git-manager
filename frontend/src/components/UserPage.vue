@@ -98,6 +98,7 @@
 <script>
 import RepoBlock from './RepoBlock.vue'
 import axios from 'axios'
+import { getRateLimitState } from '../store/rateLimitStore'
 
 export default {
   name: 'UserPage',
@@ -110,7 +111,9 @@ export default {
       repositories: [],
       currentPage: 1,
       maxPage: 1,
-      isLoading: false
+      isLoading: false,
+      abortController: null,
+      axiosSource: null
     }
   },
   props: {
@@ -120,65 +123,132 @@ export default {
     }
   },
   methods: {
+    cancelPendingRequests() {
+      // Cancel AbortController requests
+      if (this.abortController) {
+        this.abortController.abort();
+      }
+      // Cancel axios requests
+      if (this.axiosSource) {
+        this.axiosSource.cancel('Operation canceled by navigation');
+      }
+      // Create new cancellation tokens
+      this.abortController = new AbortController();
+      this.axiosSource = axios.CancelToken.source();
+    },
     async fetchUserData() {
-      this.isLoading = true
+      if (getRateLimitState()) {
+        return;
+      }
+
+      this.isLoading = true;
+      this.cancelPendingRequests();
+      
       try {
-        // First fetch repos (which validates user existence) and max page
         const [maxPageResponse, reposResponse] = await Promise.all([
-          axios.get(`/api/user/${this.username}/repos_max_page`),
-          axios.get(`/api/user/${this.username}/repos/${this.currentPage}`)
+          axios.get(`/api/user/${this.username}/repos_max_page`, {
+            signal: this.abortController.signal,
+            cancelToken: this.axiosSource.token
+          }),
+          axios.get(`/api/user/${this.username}/repos/${this.currentPage}`, {
+            signal: this.abortController.signal,
+            cancelToken: this.axiosSource.token
+          })
         ]);
 
-        const reposData = reposResponse.data;
-        const maxPageData = maxPageResponse.data;
+        if (!this.abortController.signal.aborted) {
+          const reposData = reposResponse.data;
+          const maxPageData = maxPageResponse.data;
 
-        // Then fetch user details only if repos request succeeded
-        const userResponse = await axios.get(`/api/user/${this.username}`);
-        const userData = userResponse.data;
-
-        this.userDetails = userData;
-        this.maxPage = parseInt(typeof maxPageData === 'object' ? maxPageData.maxPage : maxPageData) || 1;
-        this.repositories = Array.isArray(reposData) ? reposData : [];
+          const userResponse = await axios.get(`/api/user/${this.username}`, {
+            signal: this.abortController.signal,
+            cancelToken: this.axiosSource.token
+          });
+          
+          if (!this.abortController.signal.aborted) {
+            const userData = userResponse.data;
+            this.userDetails = userData;
+            this.maxPage = parseInt(typeof maxPageData === 'object' ? maxPageData.maxPage : maxPageData) || 1;
+            this.repositories = Array.isArray(reposData) ? reposData : [];
+          }
+        }
       } catch (error) {
+        if (axios.isCancel(error) || error.name === 'AbortError' || error.code === 'ERR_CANCELED') {
+          return;
+        }
+        
         if (!error.response || (error.response.status !== 403 && error.response.status !== 429)) {
           console.error('Error fetching data:', error);
           this.userDetails = null;
           this.repositories = [];
           this.maxPage = 1;
         }
-        // Let axios interceptor handle rate limit errors
       } finally {
-        this.isLoading = false
+        if (!this.abortController.signal.aborted) {
+          this.isLoading = false;
+        }
       }
     },
     async handlePageChange(page) {
-      this.currentPage = page
-      this.isLoading = true
+      if (getRateLimitState()) {
+        return;
+      }
+
+      this.currentPage = page;
+      this.isLoading = true;
+      this.cancelPendingRequests();
+      
       try {
-        const response = await axios.get(`/api/user/${this.username}/repos/${this.currentPage}`)
-        this.repositories = Array.isArray(response.data) ? response.data : []
-      } catch (error) {
-        if (!error.response || (error.response.status !== 403 && error.response.status !== 429)) {
-          console.error('Error fetching repositories:', error)
-          this.repositories = []
+        const response = await axios.get(`/api/user/${this.username}/repos/${this.currentPage}`, {
+          signal: this.abortController.signal,
+          cancelToken: this.axiosSource.token
+        });
+        
+        if (!this.abortController.signal.aborted) {
+          this.repositories = Array.isArray(response.data) ? response.data : [];
         }
-        // Let axios interceptor handle rate limit errors
+      } catch (error) {
+        if (axios.isCancel(error) || error.name === 'AbortError' || error.code === 'ERR_CANCELED') {
+          return;
+        }
+        
+        if (!error.response || (error.response.status !== 403 && error.response.status !== 429)) {
+          console.error('Error fetching repositories:', error);
+          this.repositories = [];
+        }
       } finally {
-        this.isLoading = false
+        if (!this.abortController.signal.aborted) {
+          this.isLoading = false;
+        }
       }
     }
-  },
-  async created() {
-    await this.fetchUserData()
   },
   watch: {
     username: {
       handler: async function() {
-        this.currentPage = 1
-        await this.fetchUserData()
+        this.currentPage = 1;
+        await this.fetchUserData();
       },
       immediate: true
+    },
+    async $route(to, from) {
+      // If we're coming from the loading page and have data to fetch
+      if (from.name === 'Loading' && !getRateLimitState()) {
+        await this.fetchUserData();
+      }
     }
+  },
+  async created() {
+    if (!getRateLimitState()) {
+      await this.fetchUserData();
+    }
+  },
+  beforeRouteLeave(to, from, next) {
+    this.cancelPendingRequests();
+    next();
+  },
+  beforeUnmount() {
+    this.cancelPendingRequests();
   }
 }
 </script>

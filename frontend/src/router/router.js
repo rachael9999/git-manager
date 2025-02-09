@@ -4,7 +4,7 @@ import RepoDetail from '../components/RepoDetail.vue';
 import Search from '../components/Search.vue';
 import UserPage from '../components/UserPage.vue';
 import LoadingPage from '../components/LoadingPage.vue';
-import { getRateLimitState } from '../store/rateLimitStore';
+import { getRateLimitState, setRateLimitState, getLastAttemptedRoute, setLastAttemptedRoute } from '../store/rateLimitStore';
 
 const routes = [
   {
@@ -55,9 +55,32 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
+  // If going to home, reset rate limit state
+  if (to.name === 'Home') {
+    setRateLimitState(false);
+    setLastAttemptedRoute(null);
+    next();
+    return;
+  }
+
+  // If we're rate limited and trying to navigate somewhere other than Loading
   if (getRateLimitState() && to.name !== 'Loading') {
+    if (to.name && to.name !== 'Home') {
+      setLastAttemptedRoute(to);
+    }
     next({ name: 'Loading' });
-  } else {
+  } 
+  // If we've just finished rate limiting and are returning from Loading
+  else if (from.name === 'Loading' && !getRateLimitState()) {
+    const lastRoute = getLastAttemptedRoute();
+    if (lastRoute && lastRoute.name) {
+      next({ ...lastRoute, force: true }); // Force component reload
+    } else {
+      next({ name: 'Home' });
+    }
+  }
+  // Normal navigation
+  else {
     next();
   }
 });
