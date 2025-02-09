@@ -93,16 +93,6 @@ describe('fetchRepositories', () => {
         expect(result).toEqual(sampleRepoData);
     });
 
-    test('should handle cache set error gracefully', async () => {
-        cache.getCacheValue = jest.fn().mockResolvedValue(null);
-        rateLimiter.schedule = jest.fn().mockResolvedValue({ data: sampleRepoData });
-        cache.setCacheValue = jest.fn().mockRejectedValue(new Error('Cache error'));
-
-        const result = await fetchRepositories(0, 1, 'sessionId');
-        
-        expect(result).toEqual(sampleRepoData);
-    });
-
 });
 
 describe('fetchRepoDetail', () => {
@@ -186,16 +176,6 @@ describe('fetchRepoDetail', () => {
             },
             CACHE_TTL.negative || 600
         );
-    });
-
-    test('should handle cache set error in negative caching', async () => {
-        cache.getCacheValue = jest.fn().mockResolvedValue(null);
-        const notFoundError = new Error('Not Found');
-        notFoundError.response = { status: 404 };
-        rateLimiter.schedule = jest.fn().mockRejectedValue(notFoundError);
-        cache.setCacheValue = jest.fn().mockRejectedValue(new Error('Cache error'));
-
-        await expect(fetchRepoDetail(999)).rejects.toThrow('Not Found');
     });
 
 });

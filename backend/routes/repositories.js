@@ -37,4 +37,16 @@ router.get('/detail/:id', async (req, res) => {
   }
 });
 
+router.get('/trending', async (req, res) => {
+  try {
+    const { period = 'week', language } = req.query;
+    const trendingRepos = await fetchTrendingRepositories(period, language);
+    return res.json(trendingRepos);
+  } catch (error) {
+    logger.error('Trending repositories fetch error:', error);
+    return res.status(error.response?.status || 500)
+      .json({ error: 'Failed to fetch trending repositories' });
+  }
+});
+
 module.exports = router;

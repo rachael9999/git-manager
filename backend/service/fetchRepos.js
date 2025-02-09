@@ -144,4 +144,58 @@ async function fetchRepoDetail(repoId) {
   }
 }
 
-module.exports = { fetchRepositories, fetchRepoDetail };
+async function fetchTrendingRepositories(period = 'week', language) {
+  try {
+    const response = await rateLimiter.schedule(() =>
+      axios.get('https://api.github.com/search/repositories', {
+        headers: {
+          Authorization: `Bearer ${process.env.GITHUB_PERSONAL_ACCESS_TOKEN}`,
+          Accept: 'application/vnd.github.v3+json'
+        },
+        params: {
+          q: `created:>${getDate(period)}${language ? ` language:${language}` : ''}`,
+          sort: 'stars',
+          order: 'desc'
+        },
+        proxy: false
+      })
+    );
+
+    return response.data.items.map(repo => ({
+      id: repo.id,
+      name: repo.name,
+      full_name: repo.full_name,
+      owner: {
+        login: repo.owner.login,
+        id: repo.owner.id,
+        avatar_url: repo.owner.avatar_url,
+        html_url: repo.owner.html_url
+      },
+      html_url: repo.html_url,
+      description: repo.description,
+      url: repo.url
+    }));
+  } catch (error) {
+    logger.error('Trending repositories fetch error:', error);
+    throw error;
+  }
+}
+
+function getDate(period) {
+  const now = new Date();
+  switch (period) {
+    case 'day':
+      now.setDate(now.getDate() - 1);
+      break;
+    case 'month':
+      now.setMonth(now.getMonth() - 1);
+      break;
+    case 'week':
+    default:
+      now.setDate(now.getDate() - 7);
+      break;
+  }
+  return now.toISOString().split('T')[0];
+}
+
+module.exports = { fetchRepositories, fetchRepoDetail, fetchTrendingRepositories };

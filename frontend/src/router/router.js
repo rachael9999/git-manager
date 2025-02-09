@@ -1,14 +1,18 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import RepositoryList from '../components/RepositoryList.vue';
 import RepoDetail from '../components/RepoDetail.vue';
+import Home from '../components/Home.vue';
 import Search from '../components/Search.vue';
 import UserPage from '../components/UserPage.vue';
+import NotFound from '../components/errors/NotFound.vue';
+import Forbidden from '../components/errors/Forbidden.vue';
+import ServerError from '../components/errors/ServerError.vue';
 
 const routes = [
   {
     path: '/',
     name: 'Home',
-    component: () => import('../components/Home.vue')
+    component: Home
   },
   {
     path: '/repositories/full',
@@ -39,17 +43,17 @@ const routes = [
   {
     path: '/404',
     name: 'NotFound',
-    component: () => import('../components/errors/NotFound.vue')
+    component: NotFound
   },
   {
     path: '/403',
     name: 'Forbidden',
-    component: () => import('../components/errors/Forbidden.vue')
+    component: Forbidden
   },
   {
     path: '/500',
     name: 'ServerError',
-    component: () => import('../components/errors/ServerError.vue')
+    component: ServerError
   },
   // Catch-all redirect to 404
   {
@@ -63,7 +67,6 @@ const router = createRouter({
   routes
 });
 
-// Optional: Global error handling
 router.onError((error) => {
   if (error.response && error.response.status) {
     const status = error.response.status;

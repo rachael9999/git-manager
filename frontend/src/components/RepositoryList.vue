@@ -61,7 +61,7 @@ export default {
       // Check if we're at a page that would need the next set
       const currentSet = Math.floor((this.currentPage - 1) / 10);
       const maxSet = Math.floor((this.maxPage - 1) / 10);
-      console.log(currentSet, maxSet);
+      // console.log(currentSet, maxSet);
       return currentSet >= maxSet - 1;
     },
   },
