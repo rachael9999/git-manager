@@ -35,23 +35,13 @@ class RedisWrapper {
   }
 
   async updateTime(key, ttl) {
-    // Return a promise but don't await it
-    const updatePromise = this.client.expire(key, ttl)
-      .then(() => {
-        logger.debug(`Updated TTL for ${key}`);
-      })
-      .catch((error) => {
-        logger.error(`Failed to update TTL for ${key}:`, error);
-        // Log error but don't throw to prevent interruption
-      });
-  
-    // Optionally log when complete
-    updatePromise.finally(() => {
-      logger.debug(`TTL update operation completed for ${key}`);
-    });
-  
-    // Return immediately
-    return updatePromise;
+    try {
+      await this.client.expire(key, ttl);
+      logger.info(`Updated TTL for ${key}`);
+    } catch (error) {
+      logger.error(`Failed to update TTL for ${key}:`, error);
+      throw error;
+    }
   }
 
   async get(key) {

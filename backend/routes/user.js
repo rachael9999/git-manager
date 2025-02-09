@@ -10,7 +10,7 @@ router.get('/:username/repos_max_page', async (req, res) => {
   try {
     const { username } = req.params;
     const maxPage = await cacheManager.getUserRepoMaxPageCount(username);
-    console.log('maxPage in user route', maxPage);
+    // console.log('maxPage in user route', maxPage);
     
     if (!maxPage) {
       // If max page doesn't exist yet, fetch user repos first

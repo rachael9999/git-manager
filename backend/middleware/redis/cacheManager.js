@@ -2,14 +2,14 @@ const redisClient = require('./redisClient');
 const { logger } = require('../../utils/logger/winstonConfig');
 const { CACHE_TTL } = require('./constants/cache_ttl');
 
-const defaultTTL = 3600;
+const defaultTTL = 3600; // 1 hour in seconds
 
 async function getCacheValue(redisKey) {
   const data = await redisClient.get(redisKey);
   return data ? JSON.parse(data) : null;
 }
 
-async function setCacheValue(redisKey, data, ttl) {
+async function setCacheValue(redisKey, data, ttl = defaultTTL) {
   // Create a promise for the cache operation
   const cachePromise = new Promise(async (resolve) => {
     try {
@@ -22,9 +22,9 @@ async function setCacheValue(redisKey, data, ttl) {
         return resolve(false);
       }
       
-      ttl = Math.max(defaultTTL, ttl);
+      // Use the provided TTL or default, but don't extend it
       await redisClient.setEx(redisKey, ttl, JSON.stringify(data));
-      logger.debug(`Cache set successfully for ${redisKey}`);
+      logger.info(`Data cached for ${redisKey}`);
       resolve(true);
     } catch (error) {
       logger.error('Redis setEx error:', {
@@ -55,12 +55,12 @@ async function setUserRepoMaxPageCount(username, maxPage) {
       throw new Error(`Invalid maxPage: ${maxPage}`);
     }
 
-    await redisClient.setEx(redisKey, Math.max(defaultTTL, CACHE_TTL.users), maxPage.toString());
+    await redisClient.setEx(redisKey, defaultTTL, maxPage.toString());
     logger.info(`Max page count cached for ${redisKey}`);
   } catch (error) {
     logger.error('Redis setEx error:', {
       redisKey,
-      ttl: Math.max(defaultTTL, CACHE_TTL.users),
+      ttl: defaultTTL,
       maxPage,
       error
     });
@@ -91,7 +91,6 @@ async function getUserRepoMaxPageCount(username) {
   logger.info(`Successfully retrieved and parsed maxPage: ${parsedValue}`);
   return parsedValue;
 }
-
 
 module.exports = {
   getCacheValue,

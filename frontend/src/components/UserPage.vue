@@ -1,9 +1,31 @@
 <template>
   <v-container>
-    <v-row>
+    <div v-if="isLoading" class="d-flex justify-center align-center" style="min-height: 400px;">
+      <v-progress-circular
+        indeterminate
+        size="64"
+        color="primary"
+        :width="6"
+      ></v-progress-circular>
+    </div>
+
+    <div v-else-if="!userDetails" class="d-flex flex-column align-center justify-center" style="min-height: 400px;">
+      <v-icon size="64" color="grey" class="mb-4">mdi-account-off</v-icon>
+      <h2 class="text-h4 mb-2">User Not Found</h2>
+      <p class="text-subtitle-1 text-grey mb-6">The GitHub user "{{ username }}" could not be found.</p>
+      <v-btn
+        color="primary"
+        @click="$router.push('/')"
+        prepend-icon="mdi-home"
+      >
+        Return to Home
+      </v-btn>
+    </div>
+
+    <v-row v-else>
       <!-- User Details Column -->
       <v-col cols="12" md="3">
-        <div v-if="userDetails" class="user-details">
+        <div class="user-details">
           <v-avatar size="250" class="mb-4">
             <v-img :src="userDetails.avatar_url" :alt="userDetails.name"/>
           </v-avatar>
@@ -52,18 +74,13 @@
 
       <!-- Repositories Column -->
       <v-col cols="12" md="9">
-        <div v-if="loading" class="d-flex justify-center">
-          <v-progress-circular
-            indeterminate
-            size="64"
-            color="primary"
-            :width="6"
-          ></v-progress-circular>
+        <h2 class="text-h5 mb-4">Repositories</h2>
+        <div v-if="repositories.length === 0" class="text-center pa-4">
+          <p class="text-subtitle-1 text-grey">No repositories found</p>
         </div>
-        <div v-else-if="repositories">
-          <h2 class="text-h5 mb-4">Repositories</h2>
+        <template v-else>
           <div v-for="repo in repositories" :key="repo.id" class="mb-4">
-            <repo-block :repo="repo" />
+            <repo-block :repo="repo" :is-loading="isLoading" />
           </div>
           
           <v-pagination
@@ -72,7 +89,7 @@
             :length="maxPage"
             @update:modelValue="handlePageChange"
           ></v-pagination>
-        </div>
+        </template>
       </v-col>
     </v-row>
   </v-container>
@@ -92,7 +109,7 @@ export default {
       repositories: [],
       currentPage: 1,
       maxPage: 1,
-      loading: false,
+      isLoading: false,
     }
   },
   props: {
@@ -102,50 +119,64 @@ export default {
     }
   },
   methods: {
-    async fetchUserDetails() {
+    async fetchUserData() {
+      this.isLoading = true
       try {
-        const response = await fetch(`/api/user/${this.username}`)
-        this.userDetails = await response.json()
+        // First fetch repos (which validates user existence) and max page
+        const [maxPageResponse, reposResponse] = await Promise.all([
+          fetch(`/api/user/${this.username}/repos_max_page`),
+          fetch(`/api/user/${this.username}/repos/${this.currentPage}`)
+        ]);
+
+        if (!reposResponse.ok) {
+          this.userDetails = null;
+          return;
+        }
+
+        const [maxPageData, reposData] = await Promise.all([
+          maxPageResponse.json(),
+          reposResponse.json()
+        ]);
+
+        // Then fetch user details only if repos request succeeded
+        const userResponse = await fetch(`/api/user/${this.username}`);
+        const userData = await userResponse.json();
+
+        this.userDetails = userData;
+        this.maxPage = parseInt(typeof maxPageData === 'object' ? maxPageData.maxPage : maxPageData) || 1;
+        this.repositories = Array.isArray(reposData) ? reposData : [];
       } catch (error) {
-        console.error('Error fetching user details:', error)
+        console.error('Error fetching data:', error)
+        this.userDetails = null
+        this.repositories = []
+        this.maxPage = 1
+      } finally {
+        this.isLoading = false
       }
     },
-    async fetchUserRepos() {
-      this.loading = true
+    async handlePageChange(page) {
+      this.currentPage = page
+      this.isLoading = true
       try {
-        // Get max page first
-        const maxPageResponse = await fetch(`/api/user/${this.username}/repos_max_page`)
-        const maxPageData = await maxPageResponse.json()
-        // Handle both cases where maxPageData might be a string or an object with maxPage field
-        this.maxPage = parseInt(typeof maxPageData === 'object' ? maxPageData.maxPage : maxPageData) || 1
-
-        // Then fetch repos for current page
         const response = await fetch(`/api/user/${this.username}/repos/${this.currentPage}`)
         const data = await response.json()
         this.repositories = Array.isArray(data) ? data : []
       } catch (error) {
         console.error('Error fetching repositories:', error)
         this.repositories = []
-        this.maxPage = 1
       } finally {
-        this.loading = false
+        this.isLoading = false
       }
-    },
-    async handlePageChange(page) {
-      this.currentPage = page
-      await this.fetchUserRepos()
     }
   },
   async created() {
-    await this.fetchUserDetails()
-    await this.fetchUserRepos()
+    await this.fetchUserData()
   },
   watch: {
     username: {
       handler: async function() {
         this.currentPage = 1
-        await this.fetchUserDetails()
-        await this.fetchUserRepos()
+        await this.fetchUserData()
       },
       immediate: true
     }

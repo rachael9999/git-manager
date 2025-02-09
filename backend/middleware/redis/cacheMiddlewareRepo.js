@@ -26,13 +26,13 @@ function cacheMiddlewareRepo(_ttl = 3600) {
       const cachedData = await cacheManager.getCacheValue(cacheKey);
       if (cachedData) {
         if (cachedData.status === 404) {
-          redisClient.updateTime(cacheKey, CACHE_TTL.negative);
+          await redisClient.updateTime(cacheKey, CACHE_TTL.negative);
           return res.status(404).json({ error: cachedData.error });
         }
 
         logger.info(`Cache hit for ${cacheKey}`);
         // Update TTL
-        redisClient.updateTime(cacheKey, ttl);
+        await redisClient.updateTime(cacheKey, ttl);
 
         return res.json(cachedData.data);
       }

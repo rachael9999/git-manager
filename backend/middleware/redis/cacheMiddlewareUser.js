@@ -22,12 +22,12 @@ function cacheMiddlewareUser(_ttl = 3600) {
           logger.info(`Cache hit for ${cacheKey}`);
           
           if (cachedValue.status === 404) {
-            redisClient.updateTime(cacheKey, CACHE_TTL.negative);
+            await redisClient.updateTime(cacheKey, CACHE_TTL.negative);
             return res.status(404).json({ error: cachedValue.error });
           }
           
           // Update TTL
-          redisClient.updateTime(cacheKey, _ttl);
+          await redisClient.updateTime(cacheKey, _ttl);
           return res.json(cachedValue.data);
         }
         logger.info(`Cache miss for ${cacheKey}`);
@@ -54,14 +54,14 @@ function cacheMiddlewareUser(_ttl = 3600) {
           logger.info(`Cache hit for ${cacheKey}`);
           
           // Update TTL
-          redisClient.updateTime(cacheKey, _ttl);
+          await redisClient.updateTime(cacheKey, _ttl);
 
           // Handle different response types
           if (cachedValue.status === 303) {
             return res.status(303).json(cachedValue);
           }
           if (cachedValue.status === 404) {
-            redisClient.updateTime(cacheKey, CACHE_TTL.negative);
+            await redisClient.updateTime(cacheKey, CACHE_TTL.negative);
             return res.status(404).json({ error: cachedValue.error });
           }
           

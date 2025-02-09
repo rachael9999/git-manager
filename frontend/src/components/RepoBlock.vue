@@ -27,7 +27,11 @@
             <span v-else class="language-dot-placeholder"></span>
           </template>
 
-          <span v-if="repo.language" class="ml-2">{{ repo.language }}</span>
+          <!-- If language is loading, show the skeleton loader -->
+          <v-skeleton-loader v-if="repo.language === undefined" type="text" width="60"></v-skeleton-loader>
+
+          <!-- Once the data has loaded, show either the language or 'undefined' -->
+          <span v-else-if="repo.language" class="ml-2">{{ repo.language }}</span>
           <span v-else class="ml-2">Undefined</span>
         </v-chip>
 
@@ -39,7 +43,8 @@
             <template v-slot:prepend>
               <v-icon size="small" class="mr-1">mdi-star</v-icon>
             </template>
-            <span>{{ repo.stargazers_count || 0 }}</span>
+            <span v-if="repo.stargazers_count !== undefined">{{ repo.stargazers_count }}</span>
+            <v-skeleton-loader v-else type="text" width="20" class="language-dot-placeholder"></v-skeleton-loader>
           </v-chip>
 
           <v-chip
@@ -50,16 +55,27 @@
             <template v-slot:prepend>
               <v-icon size="medium" class="mr-1">mdi-source-fork</v-icon>
             </template>
-            <span>{{ repo.forks_count || 0 }}</span>
+            <span v-if="repo.forks_count !== undefined">{{ repo.forks_count }}</span>
+            <v-skeleton-loader v-else type="text" width="20" class="language-dot-placeholder"></v-skeleton-loader>
           </v-chip>
+
+          <!-- <v-chip
+            size="medium"
+            class="mr-4 fixed-width-chip"
+            variant="flat"
+          >
+            <template v-slot:prepend>
+              <v-icon size="medium" class="mr-1">mdi-account</v-icon>
+            </template>
+            <span v-if="repo.subscribers_count !== undefined">{{ repo.subscribers_count }}</span>
+            <v-skeleton-loader v-else type="text" width="20" class="language-dot-placeholder"></v-skeleton-loader>
+          </v-chip> -->
 
           <v-chip
             size="medium"
             variant="flat"
           >
-            <template v-slot:prepend>
-              <span class="built-by-text">Built by</span>
-            </template>
+            <span class="built-by-text">Built by</span>
             <UserPopover 
               :username="repo.owner.login"
               :basicInfo="repo.owner"
@@ -79,6 +95,7 @@
               </div>
             </UserPopover>
           </v-chip>
+
         </div>
       </v-card-text>
     </v-card>
@@ -108,8 +125,6 @@ export default {
         TypeScript: '#2b7489',
         Go: '#00ADD8',
         Vue: '#41b883',
-        CSS: '#563d7c',
-        HTML: '#e34c26',
         undefined: '#6e7681'
       };
       return colors[this.repo.language] || '#6e7681';
@@ -133,6 +148,11 @@ export default {
 
 .language-dot-placeholder {
   background-color: #e4e1e1;
+}
+
+.v-skeleton-loader {
+  height: 12px;  
+  display: inline-block; 
 }
 
 .owner-link {
@@ -186,7 +206,7 @@ export default {
 }
 
 .owner-wrapper {
-  display: inline-flex;
+  display: flex;
   align-items: center;
 }
 
