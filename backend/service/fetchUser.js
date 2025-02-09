@@ -44,7 +44,7 @@ async function fetchUserProfile(username) {
       status: 200,
       data: filteredData
     };
-    cache.setCacheValue(cacheKey, cacheData, CACHE_TTL.users).catch(err => logger.error('Cache set error:', err));
+    cache.setCacheValue(cacheKey, cacheData, CACHE_TTL.users);
     return filteredData;
   } catch (error) {
     if (error.response?.status === 404) {
@@ -52,7 +52,7 @@ async function fetchUserProfile(username) {
         status: 404,
         error: 'User not found'
       };
-      cache.setCacheValue(cacheKey, negativeCache, CACHE_TTL.negative).catch(err => logger.error('Cache set error:', err));
+      cache.setCacheValue(cacheKey, negativeCache, CACHE_TTL.negative);
     }
     throw error;
   }
@@ -70,7 +70,7 @@ async function fetchUserRepos(username, page = 1) {
         if (cachedData.redirect) {
           return cachedData;
         }
-        return cachedData.data;
+        return cachedData;
       }
     }
 
@@ -111,11 +111,12 @@ async function fetchUserRepos(username, page = 1) {
       cache.setCacheValue(pageKey, {
         status: 200,
         data: pages[i]
-      }, CACHE_TTL.users).catch(err => logger.error('Cache set error:', err));
+      }, CACHE_TTL.users);
     }
 
     // Cache max page number
-    cache.setUserRepoMaxPageCount(username, pages.length).catch(err => logger.error('Cache set error:', err));
+    const maxPageKey = `user_repos_${username}_max_page`;
+    cache.setCacheValue(maxPageKey, pages.length.toString(), CACHE_TTL.users);
     logger.info(`User repos fetched for ${username}, ${pages.length} pages`);
 
     // Handle invalid page number
@@ -125,17 +126,16 @@ async function fetchUserRepos(username, page = 1) {
         redirect: true, 
         page: 1 
       };
-      cache.setCacheValue(cacheKey, redirectData, CACHE_TTL.negative).catch(err => logger.error('Cache set error:', err));
+      cache.setCacheValue(cacheKey, redirectData, CACHE_TTL.negative);
       return redirectData;
     }
-    return pages[0];
+
+    // Return the requested page
+    return pages[page - 1];
   } catch (error) {
     logger.error(`User repos fetch error for ${username}:`, error);
     throw error;
   }
-
-
-
 }
 
 module.exports = { fetchUserProfile, fetchUserRepos };

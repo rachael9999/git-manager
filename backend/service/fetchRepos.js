@@ -68,11 +68,9 @@ async function fetchRepositories(since = 0, requestedPage = 1, sessionId = null)
       cache.setCacheValue(pageKey, {
         status: 200,
         data: pages[i]
-      }, CACHE_TTL.repositories).catch(err => logger.error('Cache set error:', err));
+      }, CACHE_TTL.repositories);
     }
 
-    // Update session last page
-    const sessionKey = `session_${sessionId}_${apiPath}_last_id`;
     return pages[0];
   } catch (error) {
     logger.error('Repository fetch error:', error);
@@ -129,10 +127,7 @@ async function fetchRepoDetail(repoId) {
       data: filteredData
     };
     
-    await cache.setCacheValue(cacheKey, cacheData, CACHE_TTL.REPO_DETAIL)
-      .catch(error => {
-        logger.error('Cache set error:', error);
-      });
+    cache.setCacheValue(cacheKey, cacheData, CACHE_TTL.REPO_DETAIL);
 
     return filteredData;
 
@@ -143,8 +138,7 @@ async function fetchRepoDetail(repoId) {
         status: 404,
         error: 'Repository not found'
       };
-      cache.setCacheValue(cacheKey, negativeCache, CACHE_TTL.negative || 600)
-        .catch(err => logger.error('Cache set error:', err)); // 10 minutes
+      cache.setCacheValue(cacheKey, negativeCache, CACHE_TTL.negative || 600);
     }
     throw error;
   }

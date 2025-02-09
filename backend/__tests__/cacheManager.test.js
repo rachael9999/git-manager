@@ -47,7 +47,7 @@ describe('cacheManager', () => {
 
   test('setUserRepoMaxPageCount should set max page count in redis', async () => {
     await cacheManager.setUserRepoMaxPageCount(sampleUsername, sampleMaxPage);
-    expect(mockRedisClient.setEx).toHaveBeenCalledWith(`user_repos_${sampleUsername}_max_page`, sampleTTL, sampleMaxPage);
+    expect(mockRedisClient.setEx).toHaveBeenCalledWith(`user_repos_${sampleUsername}_max_page`, sampleTTL, sampleMaxPage.toString());
   });
 
   test('getUserRepoMaxPageCount should return max page count from redis', async () => {
@@ -81,7 +81,7 @@ describe('Cache Manager', () => {
   test('should set user repo max page count', async () => {
     await cacheManager.setUserRepoMaxPageCount('testUser', 5);
 
-    expect(redisClient.setEx).toHaveBeenCalledWith('user_repos_testUser_max_page', 3600, 5);
+    expect(redisClient.setEx).toHaveBeenCalledWith('user_repos_testUser_max_page', 3600, '5');
     expect(logger.info).toHaveBeenCalledWith('Max page count cached for user_repos_testUser_max_page');
   });
 

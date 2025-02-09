@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import RepositoryList from '../components/RepositoryList.vue';
 import RepoDetail from '../components/RepoDetail.vue';
 import Search from '../components/Search.vue';
+import UserPage from '../components/UserPage.vue';
 
 const routes = [
   {
@@ -14,21 +15,8 @@ const routes = [
     name: 'FullRepositories',
     component: RepositoryList,
     props: (route) => ({
-      page: parseInt(route.query.page) || 1,
-      mode: 'full'
+      page: parseInt(route.query.page) || 1
     })
-  },
-  {
-    path: '/repositories/full/page/:page',
-    name: 'RepositoryList',
-    component: RepositoryList,
-    props: (route) => ({
-      page: parseInt(route.params.page) || 1,
-      mode: 'full'
-    }),
-    redirect: to => {
-      return { path: '/repositories/full', query: { page: to.params.page } }
-    }
   },
   {
     path: '/repositories/:id',
@@ -40,6 +28,12 @@ const routes = [
     path: '/search',
     name: 'Search',
     component: Search
+  },
+  {
+    path: '/user/:username',
+    name: 'UserPage',
+    component: UserPage,
+    props: true
   },
   {
     path: '/:pathMatch(.*)*',

@@ -26,6 +26,9 @@ app.use(cors({
 const redisClient = createClient();
 redisClient.connect().catch(console.error);
 
+// Add Redis client to app context
+app.set('redis', redisClient);
+
 // Session configuration
 app.use(session({
   secret: process.env.SESSION_SECRET || 'git',
