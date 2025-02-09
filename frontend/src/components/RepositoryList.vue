@@ -25,6 +25,7 @@
         v-if="maxPage > 1"
         v-model="currentPage"
         :length="maxPage"
+        :total-visible="10"
         @update:modelValue="handlePageChange"
         class="mt-4"
       ></v-pagination>
@@ -38,7 +39,7 @@ import RepoBlock from './RepoBlock.vue';
 
 export default {
   components: {
-    RepoBlock
+    RepoBlock,
   },
   props: ['page'],
   data() {
@@ -47,41 +48,59 @@ export default {
       loading: true,
       loadingDetails: [],
       currentPage: 1,
-      maxPage: 10 // Default max page value
+      maxPage: 10,
+      pageBlockSize: 10,
     }
   },
   computed: {
-    displayedPages() {
-      const current = this.currentPage;
-      const beforeDelta = 4;
-      const afterDelta = 5;
-      let start = Math.max(1, current - beforeDelta);
-      let end = current + afterDelta;
+    shouldExtendPagination() {
+      return this.currentPage >= this.maxPage - 3;
+    },
 
-      // Adjust start and end to always show 10 pages if possible
-      const range = end - start + 1;
-      if (range < 10) {
-        if (start === 1) {
-          end = start + 9;
-        } else if (end === this.maxPage) {
-          start = Math.max(1, end - 9);
-        }
-      }
-
-      return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-    }
+    shouldFetchNextSet() {
+      // Check if we're at a page that would need the next set
+      const currentSet = Math.floor((this.currentPage - 1) / 10);
+      const maxSet = Math.floor((this.maxPage - 1) / 10);
+      console.log(currentSet, maxSet);
+      return currentSet >= maxSet - 1;
+    },
   },
 
   methods: {
-    async fetchRepositories() {
+    extendPagination() {
+      const newMax = this.currentPage + 4;
+      if (this.shouldExtendPagination && newMax > this.maxPage) {
+        this.maxPage = newMax;
+        
+        if (this.shouldFetchNextSet) {
+          const nextSetStart = Math.ceil((this.currentPage) / 10) * 10 + 1;
+          this.fetchRepositories(nextSetStart);
+        }
+      }
+    },
+
+    async handlePageChange(page) {
+      this.currentPage = page;
+      this.extendPagination();
+      this.$router.push({ 
+        name: 'FullRepositories', 
+        query: { page: page } 
+      });
+      await this.fetchRepositories(page);
+    },
+
+    async fetchRepositories(page = this.currentPage) {
       this.loading = true;
       this.repositories = [];
       const minLoadingTime = 300;
       const startTime = Date.now();
 
       try {
-        const response = await axios.get(`/api/repositories/full?page=${this.currentPage}`);
+        const response = await axios.get(`/api/repositories/full?page=${page}`);
         
+        if (response.data && response.data.length > 0) {
+          this.extendPagination();
+        }
         const initialElapsedTime = Date.now() - startTime;
         if (initialElapsedTime < minLoadingTime) {
           await new Promise(resolve => setTimeout(resolve, minLoadingTime - initialElapsedTime));
@@ -104,7 +123,7 @@ export default {
 
         await Promise.all(detailPromises);
       } catch (error) {
-        if (error.response?.status === 303 && error.response.data.redirect) {
+        if (error.response?.status === 303 || error.response.data.redirect) {
           this.$router.replace({ 
             name: 'FullRepositories', 
             query: { page: error.response.data.page } 
@@ -116,15 +135,6 @@ export default {
         this.loading = false;
       }
     },
-
-    async handlePageChange(page) {
-      this.currentPage = page;
-      this.$router.push({ 
-        name: 'FullRepositories', 
-        query: { page: page } 
-      });
-      await this.fetchRepositories();
-    }
   },
 
   watch: {

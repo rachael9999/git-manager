@@ -10,6 +10,9 @@ router.get('/full', async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const repositories = await fetchRepositories(undefined, page);
 
+    if (repositories.redirect) {
+      return res.status(303).json(repositories);
+    }
     if (repositories.status === 303) {
       return res.status(303).json(repositories);
     }

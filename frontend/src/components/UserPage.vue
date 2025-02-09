@@ -150,6 +150,14 @@ export default {
         this.userDetails = null
         this.repositories = []
         this.maxPage = 1
+
+        if (error.response.status === 403) {
+          this.$router.push('/403');
+        } else if (error.response.status >= 500) {
+          this.$router.push('/500');
+        } else {
+          this.$router.push('/404');
+        }
       } finally {
         this.isLoading = false
       }
@@ -164,6 +172,13 @@ export default {
       } catch (error) {
         console.error('Error fetching repositories:', error)
         this.repositories = []
+        if (error.response.status === 403) {
+          this.$router.push('/403');
+        } else if (error.response.status >= 500) {
+          this.$router.push('/500');
+        } else {
+          this.$router.push('/404');
+        }
       } finally {
         this.isLoading = false
       }

@@ -202,7 +202,7 @@ export default {
 }
 
 .fixed-width-chip {
-  min-width: 80px;
+  min-width: 100px;
 }
 
 .owner-wrapper {
