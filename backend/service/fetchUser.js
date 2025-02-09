@@ -10,14 +10,9 @@ async function fetchUserProfile(username) {
   // check if user is cached
   const cacheData = await cache.getCacheValue(cacheKey);
   if (cacheData) {
-    const cachedData = cacheData.data;
-    if (cachedData) {
-      if (cachedData.redirect) {
-        return cachedData;
-      }
-      return cachedData;
-    }
+    return cacheData;
   }
+
   try {
     const response = await rateLimiter.schedule(() =>
       axios.get(`https://api.github.com/users/${username}`, {
@@ -26,6 +21,13 @@ async function fetchUserProfile(username) {
       },
       proxy: false
     }));
+
+    // Forward GitHub rate limit headers
+    const rateLimitHeaders = {
+      'x-ratelimit-limit': response.headers['x-ratelimit-limit'],
+      'x-ratelimit-remaining': response.headers['x-ratelimit-remaining'],
+      'x-ratelimit-reset': response.headers['x-ratelimit-reset']
+    };
 
     const filteredData = {
       id: response.data.id,
@@ -42,36 +44,40 @@ async function fetchUserProfile(username) {
 
     const cacheData = {
       status: 200,
-      data: filteredData
+      data: filteredData,
+      headers: rateLimitHeaders
     };
-    cache.setCacheValue(cacheKey, cacheData, CACHE_TTL.users);
-    return filteredData;
+    await cache.setCacheValue(cacheKey, cacheData, CACHE_TTL.users);
+    return cacheData;
   } catch (error) {
-    if (error.response?.status === 404) {
-      const negativeCache = {
-        status: 404,
-        error: 'User not found'
-      };
-      cache.setCacheValue(cacheKey, negativeCache, CACHE_TTL.negative);
-    }
-    throw error;
+    const errorResponse = {
+      status: error.response?.status || 500,
+      error: error.response?.status === 404 ? 'User not found' : 
+             (error.response?.status === 403 || error.response?.status === 429) ? 'Rate limit exceeded' :
+             'Failed to fetch user data',
+      headers: {
+        'x-ratelimit-limit': error.response?.headers?.['x-ratelimit-limit'],
+        'x-ratelimit-remaining': error.response?.headers?.['x-ratelimit-remaining'],
+        'x-ratelimit-reset': error.response?.headers?.['x-ratelimit-reset']
+      }
+    };
+    
+    // Cache error responses but with shorter TTL
+    const ttl = error.response?.status === 404 ? CACHE_TTL.negative : CACHE_TTL.error;
+    await cache.setCacheValue(cacheKey, errorResponse, ttl);
+    return errorResponse;
   }
 }
 
 async function fetchUserRepos(username, page = 1) {
   try {
     const cacheKey = `user_repos_${username}_${page}`;
+    const maxPageKey = `user_repos_${username}_max_page`;
     
-    // Check if this invalid page was cached
+    // Check cache first
     const cachePage = await cache.getCacheValue(cacheKey);
     if (cachePage) {
-      const cachedData = cachePage.data;
-      if (cachedData) {
-        if (cachedData.redirect) {
-          return cachedData;
-        }
-        return cachedData;
-      }
+      return cachePage;
     }
 
     const response = await rateLimiter.schedule(() => 
@@ -81,6 +87,13 @@ async function fetchUserRepos(username, page = 1) {
       },
       proxy: false
     }));
+
+    // Forward GitHub rate limit headers
+    const rateLimitHeaders = {
+      'x-ratelimit-limit': response.headers['x-ratelimit-limit'],
+      'x-ratelimit-remaining': response.headers['x-ratelimit-remaining'],
+      'x-ratelimit-reset': response.headers['x-ratelimit-reset']
+    };
 
     const filteredRepos = response.data.map(repo => ({
       id: repo.id,
@@ -105,18 +118,18 @@ async function fetchUserRepos(username, page = 1) {
 
     const pages = splitPage(filteredRepos);
     
-    // Cache each valid page
+    // Cache each valid page with rate limit headers
     for (let i = 0; i < pages.length; i++) {
       const pageKey = `user_repos_${username}_${i + 1}`;
-      cache.setCacheValue(pageKey, {
+      await cache.setCacheValue(pageKey, {
         status: 200,
-        data: pages[i]
+        data: pages[i],
+        headers: rateLimitHeaders
       }, CACHE_TTL.users);
     }
 
     // Cache max page number
-    const maxPageKey = `user_repos_${username}_max_page`;
-    cache.setCacheValue(maxPageKey, pages.length.toString(), CACHE_TTL.users);
+    await cache.setCacheValue(maxPageKey, pages.length.toString(), CACHE_TTL.users);
     logger.info(`User repos fetched for ${username}, ${pages.length} pages`);
 
     // Handle invalid page number
@@ -124,17 +137,37 @@ async function fetchUserRepos(username, page = 1) {
       const redirectData = { 
         status: 303,
         redirect: true, 
-        page: 1 
+        page: 1,
+        headers: rateLimitHeaders
       };
-      cache.setCacheValue(cacheKey, redirectData, CACHE_TTL.negative);
+      await cache.setCacheValue(cacheKey, redirectData, CACHE_TTL.negative);
       return redirectData;
     }
 
-    // Return the requested page
-    return pages[page - 1];
+    const responseData = {
+      status: 200,
+      data: pages[page - 1],
+      headers: rateLimitHeaders
+    };
+    return responseData;
   } catch (error) {
     logger.error(`User repos fetch error for ${username}:`, error);
-    throw error;
+    const errorResponse = {
+      status: error.response?.status || 500,
+      error: error.response?.status === 404 ? 'User not found' :
+             (error.response?.status === 403 || error.response?.status === 429) ? 'Rate limit exceeded' :
+             'Failed to fetch repositories',
+      headers: {
+        'x-ratelimit-limit': error.response?.headers?.['x-ratelimit-limit'],
+        'x-ratelimit-remaining': error.response?.headers?.['x-ratelimit-remaining'],
+        'x-ratelimit-reset': error.response?.headers?.['x-ratelimit-reset']
+      }
+    };
+    
+    // Cache error responses
+    const ttl = error.response?.status === 404 ? CACHE_TTL.negative : CACHE_TTL.error;
+    await cache.setCacheValue(`user_repos_${username}_${page}`, errorResponse, ttl);
+    return errorResponse;
   }
 }
 

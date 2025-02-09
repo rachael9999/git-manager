@@ -3,6 +3,8 @@ import RepositoryList from '../components/RepositoryList.vue';
 import RepoDetail from '../components/RepoDetail.vue';
 import Search from '../components/Search.vue';
 import UserPage from '../components/UserPage.vue';
+import LoadingPage from '../components/LoadingPage.vue';
+import { getRateLimitState } from '../store/rateLimitStore';
 
 const routes = [
   {
@@ -36,9 +38,13 @@ const routes = [
     props: true
   },
   {
+    path: '/loading',
+    name: 'Loading',
+    component: LoadingPage
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
-    // create 404 page later
     component: () => import('../components/Home.vue') 
   }
 ];
@@ -46,6 +52,14 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes
+});
+
+router.beforeEach((to, from, next) => {
+  if (getRateLimitState() && to.name !== 'Loading') {
+    next({ name: 'Loading' });
+  } else {
+    next();
+  }
 });
 
 export default router;

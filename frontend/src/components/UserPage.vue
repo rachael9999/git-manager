@@ -97,6 +97,7 @@
 
 <script>
 import RepoBlock from './RepoBlock.vue'
+import axios from 'axios'
 
 export default {
   name: 'UserPage',
@@ -109,7 +110,7 @@ export default {
       repositories: [],
       currentPage: 1,
       maxPage: 1,
-      isLoading: false,
+      isLoading: false
     }
   },
   props: {
@@ -124,32 +125,28 @@ export default {
       try {
         // First fetch repos (which validates user existence) and max page
         const [maxPageResponse, reposResponse] = await Promise.all([
-          fetch(`/api/user/${this.username}/repos_max_page`),
-          fetch(`/api/user/${this.username}/repos/${this.currentPage}`)
+          axios.get(`/api/user/${this.username}/repos_max_page`),
+          axios.get(`/api/user/${this.username}/repos/${this.currentPage}`)
         ]);
 
-        if (!reposResponse.ok) {
-          this.userDetails = null;
-          return;
-        }
-
-        const [maxPageData, reposData] = await Promise.all([
-          maxPageResponse.json(),
-          reposResponse.json()
-        ]);
+        const reposData = reposResponse.data;
+        const maxPageData = maxPageResponse.data;
 
         // Then fetch user details only if repos request succeeded
-        const userResponse = await fetch(`/api/user/${this.username}`);
-        const userData = await userResponse.json();
+        const userResponse = await axios.get(`/api/user/${this.username}`);
+        const userData = userResponse.data;
 
         this.userDetails = userData;
         this.maxPage = parseInt(typeof maxPageData === 'object' ? maxPageData.maxPage : maxPageData) || 1;
         this.repositories = Array.isArray(reposData) ? reposData : [];
       } catch (error) {
-        console.error('Error fetching data:', error)
-        this.userDetails = null
-        this.repositories = []
-        this.maxPage = 1
+        if (!error.response || (error.response.status !== 403 && error.response.status !== 429)) {
+          console.error('Error fetching data:', error);
+          this.userDetails = null;
+          this.repositories = [];
+          this.maxPage = 1;
+        }
+        // Let axios interceptor handle rate limit errors
       } finally {
         this.isLoading = false
       }
@@ -158,12 +155,14 @@ export default {
       this.currentPage = page
       this.isLoading = true
       try {
-        const response = await fetch(`/api/user/${this.username}/repos/${this.currentPage}`)
-        const data = await response.json()
-        this.repositories = Array.isArray(data) ? data : []
+        const response = await axios.get(`/api/user/${this.username}/repos/${this.currentPage}`)
+        this.repositories = Array.isArray(response.data) ? response.data : []
       } catch (error) {
-        console.error('Error fetching repositories:', error)
-        this.repositories = []
+        if (!error.response || (error.response.status !== 403 && error.response.status !== 429)) {
+          console.error('Error fetching repositories:', error)
+          this.repositories = []
+        }
+        // Let axios interceptor handle rate limit errors
       } finally {
         this.isLoading = false
       }

@@ -5,32 +5,62 @@ const cacheManager = require('../middleware/redis/cacheManager');
 
 const router = express.Router();
 
-// Most specific routes first
 router.get('/:username/repos_max_page', async (req, res) => {
   try {
     const { username } = req.params;
     const maxPage = await cacheManager.getUserRepoMaxPageCount(username);
-    // console.log('maxPage in user route', maxPage);
     
     if (!maxPage) {
-      // If max page doesn't exist yet, fetch user repos first
-      const userData = await fetchUserProfile(username);
-      if (userData.status === 404) {
-        return res.status(404).json({ error: 'User not found' });
+      try {
+        const userData = await fetchUserProfile(username);
+        // Forward rate limit headers
+        if (userData.headers) {
+          Object.entries(userData.headers).forEach(([key, value]) => {
+            res.set(key, value);
+          });
+        }
+        
+        if (userData.status === 404 || userData.error) {
+          return res.status(404).json({ error: 'User not found' });
+        }
+        if (userData.status === 403 || userData.status === 429) {
+          return res.status(userData.status).json({ error: 'Rate limit exceeded' });
+        }
+        
+        const reposResponse = await fetchUserRepos(username, 1);
+        // Forward rate limit headers from repos response
+        if (reposResponse.headers) {
+          Object.entries(reposResponse.headers).forEach(([key, value]) => {
+            res.set(key, value);
+          });
+        }
+        
+        if (reposResponse.status === 403 || reposResponse.status === 429) {
+          return res.status(reposResponse.status).json({ error: 'Rate limit exceeded' });
+        }
+
+        const maxPageRetry = await cacheManager.getUserRepoMaxPageCount(username);
+        return res.json((maxPageRetry || 1).toString());
+      } catch (error) {
+        if (error.response?.status === 403 || error.response?.status === 429) {
+          // Forward any rate limit headers from error
+          if (error.response?.headers) {
+            ['x-ratelimit-limit', 'x-ratelimit-remaining', 'x-ratelimit-reset'].forEach(header => {
+              if (error.response.headers[header]) {
+                res.set(header, error.response.headers[header]);
+              }
+            });
+          }
+          return res.status(error.response.status).json({ error: 'Rate limit exceeded' });
+        }
+        throw error;
       }
-      // Fetch first page to trigger caching
-      await fetchUserRepos(username, 1);
-      // Try to get max page again
-      const maxPageRetry = await cacheManager.getUserRepoMaxPageCount(username);
-      if (!maxPageRetry) {
-        return res.json('1'); // Default to 1 if still not found
-      }
-      return res.json(maxPageRetry.toString());
     }
     return res.json(maxPage.toString());
   } catch (error) {
     logger.error('Max page fetch error:', error);
-    return res.status(500).json({ error: 'Failed to fetch max page' });
+    return res.status(error.response?.status || 500)
+      .json({ error: 'Failed to fetch max page' });
   }
 });
 
@@ -43,27 +73,20 @@ router.get('/:username/repos/:page', async (req, res) => {
       return res.status(400).json({ error: 'Invalid page number' });
     }
     
-    try {
-      const userData = await fetchUserProfile(username);
-      if (userData.status === 404) {
-        return res.status(404).json({ error: userData.error });
-      }
-      const repos = await fetchUserRepos(username, page);
-
-      if (repos.status === 303) {
-        return res.status(303).json(repos);
-      }
-      if (repos.status === 404) {
-        return res.status(404).json({ error: repos.error });
-      }
-
-      return res.json(repos.data || repos);
-    } catch (error) {
-      if (error.response?.status === 404) {
-        return res.status(404).json({ error: 'User not found' });
-      }
-      throw error;
+    const reposResponse = await fetchUserRepos(username, page);
+    
+    // Forward rate limit headers
+    if (reposResponse.headers) {
+      Object.entries(reposResponse.headers).forEach(([key, value]) => {
+        res.set(key, value);
+      });
     }
+    
+    if (reposResponse.error) {
+      return res.status(reposResponse.status).json({ error: reposResponse.error });
+    }
+
+    return res.json(reposResponse.data);
   } catch (error) {
     logger.error('Repository fetch error:', error);
     return res.status(error.response?.status || 500)
@@ -71,17 +94,23 @@ router.get('/:username/repos/:page', async (req, res) => {
   }
 });
 
-// Most generic route last
 router.get('/:username', async (req, res) => {
   try {
     const { username } = req.params;
     const userData = await fetchUserProfile(username);
     
-    if (userData.status === 404) {
-      return res.status(404).json({ error: userData.error });
+    // Forward rate limit headers
+    if (userData.headers) {
+      Object.entries(userData.headers).forEach(([key, value]) => {
+        res.set(key, value);
+      });
     }
     
-    return res.json(userData.data || userData);
+    if (userData.error) {
+      return res.status(userData.status).json({ error: userData.error });
+    }
+    
+    return res.json(userData.data);
   } catch (error) {
     logger.error('User fetch error:', error);
     return res.status(error.response?.status || 500)
