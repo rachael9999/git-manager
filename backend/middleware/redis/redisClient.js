@@ -74,7 +74,6 @@ class RedisWrapper {
 
 const redisWrapper = new RedisWrapper();
 
-// Initialize Redis when the module is imported
 redisWrapper.initRedis().catch(err => {
   logger.error('Redis initialization failed:', err);
 });

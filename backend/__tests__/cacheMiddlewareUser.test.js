@@ -30,7 +30,7 @@ beforeEach(() => {
 });
 
 describe('cacheMiddlewareUser', () => {
-  test('should return cached data for user profile', async () => {
+  test('return cached data for user profile', async () => {
     cacheManager.getCacheValue.mockResolvedValue(sampleData);
     redisClient.updateTime.mockResolvedValue(true);
 
@@ -42,7 +42,7 @@ describe('cacheMiddlewareUser', () => {
     expect(redisClient.updateTime).toHaveBeenCalledWith('user_testUser', 7200);
   });
 
-  test('should proceed to next middleware on cache miss for user profile', async () => {
+  test('proceed to next on cache miss for user detail', async () => {
     cacheManager.getCacheValue.mockResolvedValue(null);
 
     const response = await request(app).get('/user/testUser');
@@ -52,7 +52,7 @@ describe('cacheMiddlewareUser', () => {
     expect(cacheManager.getCacheValue).toHaveBeenCalledWith('user_testUser');
   });
 
-  test('should return cached data for user repos', async () => {
+  test('return cached data for user repos', async () => {
     cacheManager.getCacheValue.mockResolvedValue(sampleData);
     redisClient.updateTime.mockResolvedValue(true);
 
@@ -64,7 +64,7 @@ describe('cacheMiddlewareUser', () => {
     expect(redisClient.updateTime).toHaveBeenCalledWith('user_repos_testUser_1', 7200);
   });
 
-  test('should proceed to next middleware on cache miss for user repos', async () => {
+  test('proceed to next on cache miss for user repos', async () => {
     cacheManager.getCacheValue.mockResolvedValue(null);
 
     const response = await request(app).get('/user/testUser/repos/1');
@@ -74,7 +74,7 @@ describe('cacheMiddlewareUser', () => {
     expect(cacheManager.getCacheValue).toHaveBeenCalledWith('user_repos_testUser_1');
   });
 
-  test('should return 404 for cached 404 status', async () => {
+  test('return 404 for cached 404 status', async () => {
     cacheManager.getCacheValue.mockResolvedValue(sample404Data);
     redisClient.updateTime.mockResolvedValue(true);
 
@@ -86,7 +86,7 @@ describe('cacheMiddlewareUser', () => {
     expect(redisClient.updateTime).toHaveBeenCalledWith('user_testUser', 600);
   });
 
-  test('should return 303 for cached 303 status', async () => {
+  test('return 303 for cached 303 status', async () => {
     cacheManager.getCacheValue.mockResolvedValue(sample303Data);
     redisClient.updateTime.mockResolvedValue(true);
 

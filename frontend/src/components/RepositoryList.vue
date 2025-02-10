@@ -50,6 +50,13 @@ export default {
       currentPage: 1,
       maxPage: 10,
       pageBlockSize: 10,
+abortController: null
+    }
+  },
+  beforeUnmount() {
+    // Cancel any pending requests when component unmounts
+    if (this.abortController) {
+      this.abortController.abort();
     }
   },
   computed: {

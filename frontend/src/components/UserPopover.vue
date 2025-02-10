@@ -83,7 +83,7 @@ export default {
       try {
         const response = await axios.get(`/api/user/${this.username}`);
         // Handle both cached and fresh responses
-        this.userDetails = response.data.data || response.data;
+        this.userDetails = response.data;
       } catch (error) {
         console.error('Failed to fetch user details:', error);
       } finally {

@@ -22,13 +22,13 @@
             <span 
               class="language-dot"
               v-if="repo.language"
-              :style="{ backgroundColor: languageColor }"
+              :style="{ backgroundColor: getLanguageColor(repo.language) }"
             ></span>
             <span v-else class="language-dot-placeholder"></span>
           </template>
 
           <!-- If language is loading, show the skeleton loader -->
-          <v-skeleton-loader v-if="repo.language === undefined" type="text" width="60"></v-skeleton-loader>
+          <v-skeleton-loader v-if="repo.language === undefined" type="text" width="50" class="language-dot-placeholder"></v-skeleton-loader>
 
           <!-- Once the data has loaded, show either the language or 'undefined' -->
           <span v-else-if="repo.language" class="ml-2">{{ repo.language }}</span>
@@ -69,18 +69,20 @@
               :username="repo.owner.login"
               :basicInfo="repo.owner"
             >
-              <div class="owner-wrapper">
+              <div>
                 <a :href="repo.owner.html_url" target="_blank" class="owner-link">
                   <v-avatar size="16">
                     <v-img :src="repo.owner.avatar_url" :alt="repo.owner.login"></v-img>
                   </v-avatar>
                 </a>
-                <router-link 
-                  :to="{ name: 'UserPage', params: { username: repo.owner.login }}" 
+                <a 
+                  @click.prevent="openUserPage(repo.owner.login)"
                   class="owner-name ml-2"
+                  href="#"
+                  style="cursor: pointer;"
                 >
                   {{ repo.owner.login }}
-                </router-link>
+                </a>
               </div>
             </UserPopover>
             <v-skeleton-loader v-else type="text" width="100"></v-skeleton-loader>
@@ -95,9 +97,15 @@
 
 <script>
 import UserPopover from './UserPopover.vue';
+import { useRouter } from 'vue-router';
+
 export default {
   components: {
     UserPopover
+  },
+  setup() {
+    const router = useRouter();
+    return { router };
   },
   props: {
     repo: {
@@ -105,19 +113,32 @@ export default {
       required: true
     }
   },
-  computed: {
-    languageColor() {
+  methods: {
+    openUserPage(username) {
+      window.open(`/user/${username}`, '_blank');
+    },
+    getLanguageColor(language) {
       const colors = {
-        Ruby: '#701516',
         JavaScript: '#f1e05a',
         Python: '#3572A5',
         Java: '#b07219',
         TypeScript: '#2b7489',
+        'C++': '#f34b7d',
+        PHP: '#4F5D95',
+        Ruby: '#701516',
         Go: '#00ADD8',
+        Rust: '#dea584',
+        'C#': '#178600',
         Vue: '#41b883',
-        undefined: '#6e7681'
+        HTML: '#e34c26',
+        CSS: '#563d7c',
+        Shell: '#89e051',
+        Dart: '#00B4AB',
+        Swift: '#ffac45',
+        Kotlin: '#F18E33',
+        C: '#555555'
       };
-      return colors[this.repo.language] || '#6e7681';
+      return colors[language] || '#6e7681';
     }
   }
 };
@@ -132,12 +153,12 @@ export default {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background-color: v-bind(languageColor);
   display: inline-block;
 }
 
 .language-dot-placeholder {
   background-color: #e4e1e1;
+  margin-left: 1px;
 }
 
 .v-skeleton-loader {
@@ -157,12 +178,12 @@ export default {
 }
 
 .built-by-text {
-  color: #24292f !important;
+  color: #24292f;
   margin-right: 4px;
 }
 
 .v-chip :deep(.v-chip__content) {
-  color: #24292f !important;
+  color: #24292f;
   font-size: 0.875rem;
   display: flex;
   align-items: center;
@@ -195,11 +216,6 @@ export default {
   min-width: 100px;
 }
 
-.owner-wrapper {
-  display: flex;
-  align-items: center;
-}
-
 .owner-name {
   color: #24292f;
   text-decoration: none;
@@ -207,5 +223,32 @@ export default {
 
 .owner-name:hover {
   text-decoration: underline;
+  color:#1b71da;
+}
+
+.repo-name {
+  text-decoration: none;
+  color: #24292f;
+  position: relative;
+  transition: color 0.3s ease-in-out;
+}
+
+.repo-name:hover {
+  color: #1b71da;
+}
+
+.repo-name::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background-color: #1b71da;
+  transition: width 0.3s ease-in-out;
+}
+
+.repo-name:hover::after {
+  width: 100%;
 }
 </style>

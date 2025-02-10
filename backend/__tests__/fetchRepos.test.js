@@ -11,254 +11,250 @@ jest.mock('../utils/logger/winstonConfig');
 
 // Sample test data
 const sampleRepoData = [
-    {
-        id: 1,
-        name: 'test-repo',
-        description: 'Test repository',
-        html_url: 'https://github.com/test/test-repo',
-        full_name: 'test/test-repo',
-        owner: {
-            login: 'test',
-            id: 123,
-            avatar_url: 'https://github.com/test.png',
-            html_url: 'https://github.com/test'
-        }
-    }
-];
-
-const sampleRepoDetail = {
+  {
     id: 1,
     name: 'test-repo',
     description: 'Test repository',
     html_url: 'https://github.com/test/test-repo',
     full_name: 'test/test-repo',
-    stargazers_count: 100,
-    forks_count: 50,
-    language: 'JavaScript',
-    license: null,
-    archived: false,
-    disabled: false,
-    visibility: 'public',
-    subscribers_count: 10,
     owner: {
         login: 'test',
         id: 123,
         avatar_url: 'https://github.com/test.png',
         html_url: 'https://github.com/test'
     }
+  }
+];
+
+const sampleRepoDetail = {
+  id: 1,
+  name: 'test-repo',
+  description: 'Test repository',
+  html_url: 'https://github.com/test/test-repo',
+  full_name: 'test/test-repo',
+  stargazers_count: 100,
+  forks_count: 50,
+  language: 'JavaScript',
+  license: null,
+  archived: false,
+  disabled: false,
+  visibility: 'public',
+  subscribers_count: 10,
+  owner: {
+      login: 'test',
+      id: 123,
+      avatar_url: 'https://github.com/test.png',
+      html_url: 'https://github.com/test'
+  }
 };
 
 // Clear mocks before each test
 beforeEach(() => {
-    jest.clearAllMocks();
-    logger.error = jest.fn();
-    logger.warn = jest.fn();
+  jest.clearAllMocks();
+  logger.error = jest.fn();
+  logger.warn = jest.fn();
 });
 
 describe('fetchRepositories', () => {
 
-    test('should redirect to page 1 when previous page is not cached', async () => {
-        cache.getCacheValue = jest.fn().mockResolvedValue(null);
+  test('redirect to page 1 when previous page is not cached', async () => {
+    cache.getCacheValue = jest.fn().mockResolvedValue(null);
 
-        const result = await fetchRepositories(0, 2, 'sessionId');
+    const result = await fetchRepositories(0, 2, 'sessionId');
 
-        expect(result).toEqual({ redirect: true, page: 1 });
-    });
+    expect(result).toEqual({ redirect: true, page: 1 });
+  });
 
-    test('should handle API error gracefully', async () => {
-        cache.getCacheValue = jest.fn().mockResolvedValue(null);
-        cache.setCacheValue = jest.fn().mockResolvedValue(true);
-        const apiError = new Error('API Error');
-        apiError.response = { status: 500 };
-        rateLimiter.schedule = jest.fn().mockRejectedValue(apiError);
+  test('API error', async () => {
+    cache.getCacheValue = jest.fn().mockResolvedValue(null);
+    cache.setCacheValue = jest.fn().mockResolvedValue(true);
+    const apiError = new Error('API Error');
+    apiError.response = { status: 500 };
+    rateLimiter.schedule = jest.fn().mockRejectedValue(apiError);
 
-        await expect(fetchRepositories(0, 1, 'sessionId')).rejects.toThrow('API Error');
-    });
+    await expect(fetchRepositories(0, 1, 'sessionId')).rejects.toThrow('API Error');
+  });
 
-    test('should handle undefined requestedPage', async () => {
-        cache.getCacheValue = jest.fn().mockResolvedValue(null);
-        rateLimiter.schedule = jest.fn().mockResolvedValue({ data: sampleRepoData });
-        cache.setCacheValue = jest.fn().mockResolvedValue(true);
+  test('undefined requestedPage', async () => {
+    cache.getCacheValue = jest.fn().mockResolvedValue(null);
+    rateLimiter.schedule = jest.fn().mockResolvedValue({ data: sampleRepoData });
+    cache.setCacheValue = jest.fn().mockResolvedValue(true);
 
-        const result = await fetchRepositories(0, undefined, 'sessionId');
-        expect(result).toEqual(sampleRepoData);
-    });
+    const result = await fetchRepositories(0, undefined, 'sessionId');
+    expect(result).toEqual(sampleRepoData);
+  });
 
-    test('should handle null requestedPage', async () => {
-        cache.getCacheValue = jest.fn().mockResolvedValue(null);
-        rateLimiter.schedule = jest.fn().mockResolvedValue({ data: sampleRepoData });
-        cache.setCacheValue = jest.fn().mockResolvedValue(true);
+  test('null requestedPage', async () => {
+    cache.getCacheValue = jest.fn().mockResolvedValue(null);
+    rateLimiter.schedule = jest.fn().mockResolvedValue({ data: sampleRepoData });
+    cache.setCacheValue = jest.fn().mockResolvedValue(true);
 
-        const result = await fetchRepositories(0, null, 'sessionId');
-        expect(result).toEqual(sampleRepoData);
-    });
+    const result = await fetchRepositories(0, null, 'sessionId');
+    expect(result).toEqual(sampleRepoData);
+  });
 
 });
 
 describe('fetchRepoDetail', () => {
 
-    test('should set cache value correctly', async () => {
-        // Mock cache miss initially
-        cache.getCacheValue = jest.fn().mockResolvedValue(null);
-        
-        // Mock successful API response
-        rateLimiter.schedule = jest.fn().mockResolvedValue({ data: sampleRepoDetail });
-        
-        // Mock cache setting
-        cache.setCacheValue = jest.fn().mockResolvedValue(true);
+  test('set cache value', async () => {
+    cache.getCacheValue = jest.fn().mockResolvedValue(null);
+    
+    rateLimiter.schedule = jest.fn().mockResolvedValue({ data: sampleRepoDetail });
+  
+    cache.setCacheValue = jest.fn().mockResolvedValue(true);
 
-        await fetchRepoDetail(1);
+    await fetchRepoDetail(1);
 
-        // Verify cache was set with correct parameters
-        expect(cache.setCacheValue).toHaveBeenCalledWith(
-            'detail_repo_1',
-            {
-                status: 200,
-                data: sampleRepoDetail
-            },
-            CACHE_TTL.REPO_DETAIL
-        );
-    });
-
-    test('should handle API errors without response status', async () => {
-        cache.getCacheValue = jest.fn().mockResolvedValue(null);
-        rateLimiter.schedule = jest.fn().mockRejectedValue(new Error('Network Error'));
-
-        await expect(fetchRepoDetail(1)).rejects.toThrow('Network Error');
-    });
-
-    test('should return cached data for repository detail', async () => {
-        const cachedData = {
+    expect(cache.setCacheValue).toHaveBeenCalledWith(
+        'detail_repo_1',
+        {
             status: 200,
             data: sampleRepoDetail
-        };
-        cache.getCacheValue = jest.fn().mockResolvedValue(cachedData);
+        },
+        CACHE_TTL.REPO_DETAIL
+    );
+  });
 
-        const result = await fetchRepoDetail(1);
+  test('API errors without response status', async () => {
+    cache.getCacheValue = jest.fn().mockResolvedValue(null);
+    rateLimiter.schedule = jest.fn().mockRejectedValue(new Error('Network Error'));
 
-        expect(result).toEqual(sampleRepoDetail);
-        expect(cache.getCacheValue).toHaveBeenCalledWith('detail_repo_1');
-    });
+    await expect(fetchRepoDetail(1)).rejects.toThrow('Network Error');
+  });
 
-    test('should fetch and cache repository detail on cache miss', async () => {
-        cache.getCacheValue = jest.fn().mockResolvedValue(null);
-        rateLimiter.schedule = jest.fn().mockResolvedValue({ data: sampleRepoDetail });
-        cache.setCacheValue = jest.fn().mockResolvedValue(true);
+  test('return cached data', async () => {
+    const cachedData = {
+      status: 200,
+      data: sampleRepoDetail
+    };
+    cache.getCacheValue = jest.fn().mockResolvedValue(cachedData);
 
-        const result = await fetchRepoDetail(1);
+    const result = await fetchRepoDetail(1);
 
-        expect(result).toEqual(sampleRepoDetail);
-        expect(cache.getCacheValue).toHaveBeenCalledWith('detail_repo_1');
-        expect(rateLimiter.schedule).toHaveBeenCalledWith(expect.any(Function));
-        expect(cache.setCacheValue).toHaveBeenCalledWith(
-            'detail_repo_1',
-            {
-                status: 200,
-                data: sampleRepoDetail
-            },
-            CACHE_TTL.REPO_DETAIL
-        );
-    });
+    expect(result).toEqual(sampleRepoDetail);
+    expect(cache.getCacheValue).toHaveBeenCalledWith('detail_repo_1');
+  });
 
-    test('should handle 404 error and cache negative result', async () => {
-        cache.getCacheValue = jest.fn().mockResolvedValue(null);
-        const notFoundError = new Error('Not Found');
-        notFoundError.response = { status: 404 };
-        rateLimiter.schedule = jest.fn().mockRejectedValue(notFoundError);
-        cache.setCacheValue = jest.fn().mockResolvedValue(true);
+  test('fetch and cache repository detail on cache miss', async () => {
+    cache.getCacheValue = jest.fn().mockResolvedValue(null);
+    rateLimiter.schedule = jest.fn().mockResolvedValue({ data: sampleRepoDetail });
+    cache.setCacheValue = jest.fn().mockResolvedValue(true);
 
-        await expect(fetchRepoDetail(999)).rejects.toThrow('Not Found');
-        expect(cache.setCacheValue).toHaveBeenCalledWith(
-            'detail_repo_999',
-            {
-                status: 404,
-                error: 'Repository not found'
-            },
-            CACHE_TTL.negative || 600
-        );
-    });
+    const result = await fetchRepoDetail(1);
+
+    expect(result).toEqual(sampleRepoDetail);
+    expect(cache.getCacheValue).toHaveBeenCalledWith('detail_repo_1');
+    expect(rateLimiter.schedule).toHaveBeenCalledWith(expect.any(Function));
+    expect(cache.setCacheValue).toHaveBeenCalledWith(
+      'detail_repo_1',
+      {
+          status: 200,
+          data: sampleRepoDetail
+      },
+      CACHE_TTL.REPO_DETAIL
+    );
+  });
+
+  test('404 error and cache negative result', async () => {
+    cache.getCacheValue = jest.fn().mockResolvedValue(null);
+    const notFoundError = new Error('Not Found');
+    notFoundError.response = { status: 404 };
+    rateLimiter.schedule = jest.fn().mockRejectedValue(notFoundError);
+    cache.setCacheValue = jest.fn().mockResolvedValue(true);
+
+    await expect(fetchRepoDetail(999)).rejects.toThrow('Not Found');
+    expect(cache.setCacheValue).toHaveBeenCalledWith(
+      'detail_repo_999',
+      {
+          status: 404,
+          error: 'Repository not found'
+      },
+      CACHE_TTL.negative || 600
+    );
+  });
 
 });
 
 describe('fetchTrendingRepositories', () => {
-    const sampleTrendingData = {
-        items: [
-            {
-                id: 1,
-                name: 'trending-repo',
-                full_name: 'test/trending-repo',
-                description: 'Trending test repository',
-                html_url: 'https://github.com/test/trending-repo',
-                url: 'https://api.github.com/repos/test/trending-repo',
-                stargazers_count: 1000,
-                forks_count: 100,
-                language: 'JavaScript',
-                owner: {
-                    login: 'test',
-                    id: 123,
-                    avatar_url: 'https://github.com/test.png',
-                    html_url: 'https://github.com/test'
-                }
-            }
-        ]
-    };
+  const sampleTrendingData = {
+    items: [
+      {
+        id: 1,
+        name: 'trending-repo',
+        full_name: 'test/trending-repo',
+        description: 'Trending test repository',
+        html_url: 'https://github.com/test/trending-repo',
+        url: 'https://api.github.com/repos/test/trending-repo',
+        stargazers_count: 1000,
+        forks_count: 100,
+        language: 'JavaScript',
+        owner: {
+            login: 'test',
+            id: 123,
+            avatar_url: 'https://github.com/test.png',
+            html_url: 'https://github.com/test'
+        }
+      }
+    ]
+  };
 
-    test('should fetch and cache trending repositories', async () => {
-        cache.getCacheValue = jest.fn().mockResolvedValue(null);
-        rateLimiter.schedule = jest.fn().mockResolvedValue({ data: sampleTrendingData });
-        cache.setCacheValue = jest.fn().mockResolvedValue(true);
+  test('fetch and cache trending repositories', async () => {
+    cache.getCacheValue = jest.fn().mockResolvedValue(null);
+    rateLimiter.schedule = jest.fn().mockResolvedValue({ data: sampleTrendingData });
+    cache.setCacheValue = jest.fn().mockResolvedValue(true);
 
-        const result = await fetchTrendingRepositories('week', 'JavaScript', 1);
+    const result = await fetchTrendingRepositories('week', 'JavaScript', 1);
 
-        expect(result.status).toBe(200);
-        expect(result.data[0]).toEqual({
+    expect(result.status).toBe(200);
+    expect(result.data[0]).toEqual({
+        id: 1,
+        name: 'trending-repo',
+        full_name: 'test/trending-repo',
+        description: 'Trending test repository',
+        html_url: 'https://github.com/test/trending-repo',
+        url: 'https://api.github.com/repos/test/trending-repo',
+        stars: 1000,
+        forks: 100,
+        language: 'JavaScript',
+        owner: {
+          login: 'test',
+          id: 123,
+          avatar_url: 'https://github.com/test.png',
+          html_url: 'https://github.com/test'
+        }
+    });
+  });
+
+  test('return cached datae', async () => {
+    const cachedData = {
+        status: 200,
+        data: [{
             id: 1,
-            name: 'trending-repo',
-            full_name: 'test/trending-repo',
-            description: 'Trending test repository',
-            html_url: 'https://github.com/test/trending-repo',
-            url: 'https://api.github.com/repos/test/trending-repo',
-            stars: 1000,
-            forks: 100,
-            language: 'JavaScript',
-            owner: {
-                login: 'test',
-                id: 123,
-                avatar_url: 'https://github.com/test.png',
-                html_url: 'https://github.com/test'
-            }
-        });
+            name: 'cached-repo',
+            stars: 500
+        }],
+        total_pages: 1
+    };
+    cache.getCacheValue = jest.fn().mockResolvedValue(cachedData);
+
+    const result = await fetchTrendingRepositories('day', null, 1);
+
+    expect(result).toEqual(cachedData);
+    expect(rateLimiter.schedule).not.toHaveBeenCalled();
+  });
+
+  test('redirect to page 1', async () => {
+    cache.getCacheValue = jest.fn().mockResolvedValue(null);
+    rateLimiter.schedule = jest.fn().mockResolvedValue({ data: { items: [sampleTrendingData.items[0]] } });
+    cache.setCacheValue = jest.fn().mockResolvedValue(true);
+
+    const result = await fetchTrendingRepositories('day', null, 5);
+
+    expect(result).toEqual({
+      status: 303,
+      redirect: true,
+      page: 1
     });
-
-    test('should return cached data when available', async () => {
-        const cachedData = {
-            status: 200,
-            data: [{
-                id: 1,
-                name: 'cached-repo',
-                stars: 500
-            }],
-            total_pages: 1
-        };
-        cache.getCacheValue = jest.fn().mockResolvedValue(cachedData);
-
-        const result = await fetchTrendingRepositories('day', null, 1);
-
-        expect(result).toEqual(cachedData);
-        expect(rateLimiter.schedule).not.toHaveBeenCalled();
-    });
-
-    test('should redirect to page 1 when requested page exceeds available pages', async () => {
-        cache.getCacheValue = jest.fn().mockResolvedValue(null);
-        rateLimiter.schedule = jest.fn().mockResolvedValue({ data: { items: [sampleTrendingData.items[0]] } });
-        cache.setCacheValue = jest.fn().mockResolvedValue(true);
-
-        const result = await fetchTrendingRepositories('day', null, 5);
-
-        expect(result).toEqual({
-            status: 303,
-            redirect: true,
-            page: 1
-        });
-    });
+  });
 });

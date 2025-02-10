@@ -25,7 +25,15 @@ const routes = [
     path: '/user/:username',
     name: 'UserPage',
     component: UserPage,
-    props: true
+    props: true,
+    beforeEnter: (to, from, next) => {
+      if (to.target === '_blank') {
+        window.open(to.fullPath, '_blank');
+        next(false);
+      } else {
+        next();
+      }
+    }
   },
   {
     path: '/trending',

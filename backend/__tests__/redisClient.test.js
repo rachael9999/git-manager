@@ -1,5 +1,6 @@
 const redis = require('redis');
 const { logger } = require('../utils/logger/winstonConfig');
+const redisClient = require('../middleware/redis/redisClient');
 
 jest.mock('redis');
 jest.mock('../utils/logger/winstonConfig');
@@ -20,20 +21,18 @@ describe('Redis Client', () => {
     redis.createClient.mockReturnValue(mockRedisClient);
   });
 
-  test('should initialize Redis with LRU policy', async () => {
-    const redisClient = require('../middleware/redis/redisClient');
+  test('initialize Redis, LRU policy, 5gb memory', async () => {
     await redisClient.initRedis();
 
     expect(redis.createClient).toHaveBeenCalled();
     expect(mockRedisClient.on).toHaveBeenCalledWith('error', expect.any(Function));
     expect(mockRedisClient.connect).toHaveBeenCalled();
     expect(mockRedisClient.configSet).toHaveBeenCalledWith('maxmemory-policy', 'allkeys-lru');
-    expect(mockRedisClient.configSet).toHaveBeenCalledWith('maxmemory', '20gb');
+    expect(mockRedisClient.configSet).toHaveBeenCalledWith('maxmemory', '5gb');
     expect(logger.info).toHaveBeenCalledWith('Redis initialized with LRU policy');
   });
 
-  test('should update TTL for a key', async () => {
-    const redisClient = require('../middleware/redis/redisClient');
+  test('update TTL', async () => {
     await redisClient.initRedis();
     await redisClient.updateTime('testKey', 3600);
 
@@ -41,8 +40,7 @@ describe('Redis Client', () => {
     expect(logger.info).toHaveBeenCalledWith('Updated TTL for testKey');
   });
 
-  test('should get value for a key', async () => {
-    const redisClient = require('../middleware/redis/redisClient');
+  test('getValue', async () => {
     await redisClient.initRedis();
     mockRedisClient.get.mockResolvedValue('testValue');
 

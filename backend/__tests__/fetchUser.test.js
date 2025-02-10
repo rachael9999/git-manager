@@ -28,7 +28,7 @@ describe('fetchUserProfile', () => {
     expect(cache.getCacheValue).toHaveBeenCalledWith('user_testUser');
   });
 
-  test('should fetch and cache user profile on cache miss', async () => {
+  test('fetch and cache user profile on cache miss', async () => {
     cache.getCacheValue.mockResolvedValue(null);
     rateLimiter.schedule.mockResolvedValue({ data: sampleUserProfile });
     cache.setCacheValue.mockResolvedValue(true);
@@ -43,7 +43,7 @@ describe('fetchUserProfile', () => {
 });
 
 describe('fetchUserRepos', () => {
-  test('should fetch and cache user repos on cache miss', async () => {
+  test('fetch and cache user repos on cache miss', async () => {
     cache.getCacheValue.mockResolvedValue(null);
     rateLimiter.schedule.mockResolvedValue({ data: sampleUserRepos });
     cache.setCacheValue.mockResolvedValue(true);
@@ -57,7 +57,7 @@ describe('fetchUserRepos', () => {
     expect(cache.setCacheValue).toHaveBeenCalledWith('user_repos_testUser_1', { status: 200, data: sampleUserRepos }, CACHE_TTL.users);
   });
 
-  test('should handle invalid page number by returning redirect data', async () => {
+  test('invalid page number, redirect', async () => {
     cache.getCacheValue.mockResolvedValue(null);
     rateLimiter.schedule.mockResolvedValue({ data: sampleUserRepos });
     cache.setCacheValue.mockResolvedValue(true);
@@ -69,7 +69,7 @@ describe('fetchUserRepos', () => {
     expect(cache.setCacheValue).toHaveBeenCalledWith('user_repos_testUser_10', { status: 303, redirect: true, page: 1 }, CACHE_TTL.negative);
   });
 
-  test('should return cached redirect data for invalid page number', async () => {
+  test('return cached redirect, invalid page number', async () => {
     const redirectData = { status: 303, redirect: true, page: 1 };
     cache.getCacheValue.mockResolvedValue({ data: redirectData });
 

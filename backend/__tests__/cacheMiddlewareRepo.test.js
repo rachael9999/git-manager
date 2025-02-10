@@ -32,7 +32,7 @@ beforeEach(() => {
 });
 
 describe('cacheMiddlewareRepo', () => {
-  test('should return cached data for repository page', async () => {
+  test('sreturn cached data for repository page', async () => {
     cacheManager.getCacheValue.mockResolvedValue(sampleData);
     redisClient.updateTime.mockResolvedValue(true);
 
@@ -44,7 +44,7 @@ describe('cacheMiddlewareRepo', () => {
     expect(redisClient.updateTime).toHaveBeenCalledWith('repositories_page_1', 3600);
   });
 
-  test('should proceed to next middleware on cache miss for repository page', async () => {
+  test('proceed to next on cache miss for repository page', async () => {
     cacheManager.getCacheValue.mockResolvedValue(null);
 
     const response = await request(app).get('/repositories/full?page=1');
@@ -54,7 +54,7 @@ describe('cacheMiddlewareRepo', () => {
     expect(cacheManager.getCacheValue).toHaveBeenCalledWith('repositories_page_1');
   });
 
-  test('should return cached data for repository detail', async () => {
+  test('return cached data for repository detail', async () => {
     cacheManager.getCacheValue.mockResolvedValue(sampleData);
     redisClient.updateTime.mockResolvedValue(true);
 
@@ -66,7 +66,7 @@ describe('cacheMiddlewareRepo', () => {
     expect(redisClient.updateTime).toHaveBeenCalledWith('detail_repo_123', 3600);
   });
 
-  test('should proceed to next middleware on cache miss for repository detail', async () => {
+  test('proceed to next on cache miss for repository detail', async () => {
     cacheManager.getCacheValue.mockResolvedValue(null);
 
     const response = await request(app).get('/repositories/detail/123');
@@ -76,7 +76,7 @@ describe('cacheMiddlewareRepo', () => {
     expect(cacheManager.getCacheValue).toHaveBeenCalledWith('detail_repo_123');
   });
 
-  test('should return 404 for cached 404 status', async () => {
+  test('return 404 for cached 404 status', async () => {
     cacheManager.getCacheValue.mockResolvedValue(sample404Data);
     redisClient.updateTime.mockResolvedValue(true);
 
@@ -88,7 +88,7 @@ describe('cacheMiddlewareRepo', () => {
     expect(redisClient.updateTime).toHaveBeenCalledWith('detail_repo_123', 600);
   });
 
-  test('should bypass middleware for non-repository routes', async () => {
+  test('bypass middleware for non-repository routes', async () => {
     const response = await request(app).get('/user/profile');
 
     expect(response.status).toBe(200);
