@@ -2,6 +2,11 @@
 
 A modern web application for exploring GitHub repositories with advanced features including real-time updates, caching, and trending repository analysis.
 
+## nginx handling
+Main application: http://localhost
+API endpoints: http://localhost/api/...
+Swagger docs: http://localhost/api-docs
+
 ## Features
 
 - **Repository Exploration**
@@ -19,7 +24,8 @@ A modern web application for exploring GitHub repositories with advanced feature
 
 - **Performance Optimizations**
   - Redis caching for improved response times
-  - Nginx reverse proxy configuration
+  - Nginx level caching for static assets
+  - Browser-level caching with appropriate headers
 
 - **Health Check and hosting**
   - winston logger
@@ -75,11 +81,6 @@ CORS_ORIGIN=http://localhost:5173
 docker-compose up --build
 ```
 
-The application will be available at:
-- Frontend: http://localhost
-- Backend API: http://localhost:3000
-- Redis: localhost:6379
-
 ## Project Structure
 
 ```
@@ -119,10 +120,6 @@ The application implements a multi-layer caching strategy:
    - User profiles
    - Trending repositories
    - Cache invalidation after TTL
-
-2. **Response Caching**
-   - Nginx level caching for static assets
-   - Browser-level caching with appropriate headers
 
 ## Error Handling
 
