@@ -1,10 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import TrendingPage from '@/components/TrendingPage.vue'
-import RepoBlock from '@/components/RepoBlock.vue'
 import { createRouter, createMemoryHistory } from 'vue-router'
 
-// Mock fetch globally
+// Mock fetch globally using vi.fn()
 global.fetch = vi.fn()
 
 const router = createRouter({
@@ -47,9 +46,10 @@ function mountComponent(options = {}) {
 
 describe('TrendingPage', () => {
   beforeEach(async () => {
-    vi.clearAllMocks()
-    fetch.mockReset()
-    await router.push('/')
+    vi.clearAllMocks()  // Clears all mocks, including the global fetch
+    fetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ data: [] }) })
+    
+    await router.push('/trending?page=1&period=week')
     await router.isReady()
   })
 
@@ -66,7 +66,7 @@ describe('TrendingPage', () => {
   it('initializes with query parameters', async () => {
     await router.push('/trending?page=2&period=month&language=JavaScript')
     await router.isReady()
-    
+
     const wrapper = mountComponent()
     await wrapper.vm.$nextTick()
 
@@ -90,7 +90,6 @@ describe('TrendingPage', () => {
     )
   })
 
-
   it('handles fetch errors gracefully', async () => {
     fetch.mockRejectedValueOnce(new Error('Network error'))
 
@@ -101,5 +100,4 @@ describe('TrendingPage', () => {
     expect(wrapper.vm.error).toBeTruthy()
     expect(wrapper.vm.loading).toBe(false)
   })
-
 })

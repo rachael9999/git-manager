@@ -7,6 +7,8 @@ const RedisStore = require('connect-redis').default;
 const cacheMiddlewareRepo = require('./middleware/redis/cacheMiddlewareRepo');
 const cacheMiddlewareUser = require('./middleware/redis/cacheMiddlewareUser');
 const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpecs = require('./utils/swagger');
 const repositoriesRouter = require('./routes/repositories');
 const userRouter = require('./routes/user');
 const path = require('path');
@@ -21,6 +23,9 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Swagger UI setup
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 // Create Redis client
 const redisClient = createClient();

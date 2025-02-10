@@ -5,7 +5,6 @@ const cacheManager = require('../middleware/redis/cacheManager');
 
 const router = express.Router();
 
-// Most specific routes first
 router.get('/:username/repos_max_page', async (req, res) => {
   try {
     const { username } = req.params;

@@ -74,26 +74,27 @@ abortController: null
 
   methods: {
     extendPagination() {
-              const newMax = this.currentPage + 4;
-        if (this.shouldExtendPagination && newMax > this.maxPage) {
-          this.maxPage = newMax;
-          
-          if (this.shouldFetchNextSet) {
-            const nextSetStart = Math.ceil((this.currentPage) / 10) * 10 + 1;
-                          this.fetchRepositories(nextSetStart);
-            }
-          }
-            },
+      const newMax = this.currentPage + 4;
+      if (this.shouldExtendPagination && newMax > this.maxPage) {
+        this.maxPage = newMax;
+        
+        if (this.shouldFetchNextSet) {
+          const nextSetStart = Math.ceil((this.currentPage) / 10) * 10 + 1;
+          this.fetchRepositories(nextSetStart);
+        }
+      }
+    },
 
     async handlePageChange(page) {
-              this.currentPage = page;
-        this.extendPagination();
-        this.$router.push({ 
-          name: 'FullRepositories', 
-          query: { page: page.toString() } 
-        });
-        await this.fetchRepositories(page);
-          },
+      this.currentPage = page;
+      this.extendPagination();
+      this.repositories = [];
+      this.$router.push({ 
+        name: 'FullRepositories', 
+        query: { page: page.toString() } 
+      });
+      await this.fetchRepositories(page);
+    },
 
     async fetchRepositories(page = this.currentPage) {
       this.loading = true;
