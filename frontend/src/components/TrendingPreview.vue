@@ -97,7 +97,8 @@ export default {
       try {
         const response = await axios.get('/api/repositories/trending?period=week&page=1')
         const data = response.data
-        this.trendingRepos = Array.isArray(data) ? data.slice(0, 6) : []
+        this.trendingRepos = Array.isArray(data) ? data.slice(0, 6) : 
+        Array.isArray(data.data) ? data.data.slice(0, 6) : []
       } catch (error) {
         this.error = 'Failed to fetch trending repositories'
         console.error(error)

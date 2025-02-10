@@ -126,10 +126,10 @@ abortController: null
           this.extendPagination();
         }
         
-        const initialElapsedTime = Date.now() - startTime;
-        if (initialElapsedTime < minLoadingTime) {
-          await new Promise(resolve => setTimeout(resolve, minLoadingTime - initialElapsedTime));
-        }
+        // const initialElapsedTime = Date.now() - startTime;
+        // if (initialElapsedTime < minLoadingTime) {
+        //   await new Promise(resolve => setTimeout(resolve, minLoadingTime - initialElapsedTime));
+        // }
 
         // Make sure each repo is a valid object before setting
         this.repositories = repos.filter(repo => repo && typeof repo === 'object');

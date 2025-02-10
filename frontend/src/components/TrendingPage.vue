@@ -93,64 +93,70 @@ export default {
   },
   watch: {
     selectedPeriod() {
-      this.currentPage = 1
-      this.fetchTrendingRepos()
+      this.updateURLParams({ period: this.selectedPeriod })
     },
     selectedLanguage() {
-      this.currentPage = 1
-      this.fetchTrendingRepos()
+      this.updateURLParams({ language: this.selectedLanguage })
+    },
+    '$route.query': {
+      handler(newQuery) {
+        this.currentPage = parseInt(newQuery.page) || 1
+        this.selectedPeriod = newQuery.period || 'week'
+        this.selectedLanguage = newQuery.language || ''
+        this.fetchTrendingRepos()
+      },
+      immediate: true
     }
   },
-  created() {
-    // Get query params if they exist
-    const { page, period, language } = this.$route.query
-    if (page) this.currentPage = parseInt(page)
-    if (period) this.selectedPeriod = period
-    if (language) this.selectedLanguage = language
-    
-    this.fetchTrendingRepos()
-  },
   methods: {
+    updateURLParams(params) {
+      this.$router.push({
+        query: {
+          ...this.$route.query,
+          ...params,
+          page: this.currentPage
+        }
+      })
+    },
     async fetchTrendingRepos() {
       this.loading = true
       this.error = null
 
       try {
-        let url = `http://localhost:3000/repositories/trending?period=${this.selectedPeriod}&page=${this.currentPage}`
-        if (this.selectedLanguage) {
-          url += `&language=${this.selectedLanguage}`
+        const { period = this.selectedPeriod, language = this.selectedLanguage, page = this.currentPage } = this.$route.query
+        
+        let url = `http://localhost:3000/repositories/trending?period=${period}&page=${page}`
+        if (language) {
+          url += `&language=${language}`
         }
 
         const response = await fetch(url)
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
         const responseData = await response.json()
-        
-        // Handle both possible response formats
-        const data = responseData.data || responseData
-        if (data.redirect) {
-          this.currentPage = 1
+
+        if (responseData.status === 303 || responseData.redirect) {
+          console.log('Redirecting to:', responseData.page)
+          this.currentPage = responseData.page || 1
+          await this.$router.push({
+            query: {
+              ...this.$route.query,
+              page: this.currentPage
+            }
+          })
           await this.fetchTrendingRepos()
           return
         }
 
-        // Validate the data is an array
-        if (!Array.isArray(data)) {
-          throw new Error('Invalid response format')
-        }
-
-        this.trendingRepos = data
-        this.totalPages = Math.min(responseData.total_pages || 10, 10) // Limit to 10 pages
+        this.trendingRepos = responseData.data || responseData
+        this.totalPages = Math.min(responseData.total_pages || 10, 10)
       } catch (error) {
         this.error = 'Failed to fetch trending repositories'
-        console.error(error)
+        console.error('Trending repositories fetch error:', error)
       } finally {
         this.loading = false
       }
     },
     changePage(newPage) {
-      if (newPage < 1 || newPage > Math.min(this.totalPages, 10)) return
+      // if (newPage < 1 || newPage > Math.min(this.totalPages, 10)) return
       
       // Update URL with new query params
       this.$router.push({
