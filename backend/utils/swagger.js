@@ -10,12 +10,16 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:3000',
-        description: 'Development server',
+        url: 'http://backend:3000',
+        description: 'Development server (Docker)',
       },
+      {
+        url: 'http://localhost:3000',
+        description: 'Local development server',
+      }
     ],
   },
-  apis: ['./docs/swagger/*.swagger.js'], // Path to the swagger documentation files
+  apis: ['./docs/swagger/*.swagger.js'],
 };
 
 const specs = swaggerJsdoc(options);
