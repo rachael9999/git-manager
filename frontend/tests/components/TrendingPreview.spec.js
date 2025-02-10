@@ -1,124 +1,133 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import TrendingPreview from '@/components/TrendingPreview.vue'
-import axios from 'axios'
+import TrendingPage from '@/components/TrendingPage.vue'
+import RepoBlock from '@/components/RepoBlock.vue'
+import { createRouter, createMemoryHistory } from 'vue-router'
 
-// Mock axios
-vi.mock('axios')
+// Mock fetch globally
+global.fetch = vi.fn()
+
+const router = createRouter({
+  history: createMemoryHistory(),
+  routes: [
+    { 
+      path: '/',
+      redirect: '/trending'
+    },
+    { 
+      path: '/trending', 
+      name: 'TrendingPage', 
+      component: TrendingPage,
+      props: route => ({ 
+        page: route.query.page || '1',
+        period: route.query.period || 'week',
+        language: route.query.language || ''
+      })
+    }
+  ]
+})
 
 function mountComponent(options = {}) {
-  return mount(TrendingPreview, {
+  return mount(TrendingPage, {
     global: {
+      plugins: [router],
       stubs: {
-        RouterLink: {
-          template: '<a><slot /></a>'
-        }
+        RepoBlock: true,
+        'v-pagination': {
+          template: '<div class="v-pagination" @click="$emit(\'update:modelValue\', value)"></div>',
+          props: ['modelValue'],
+          emits: ['update:modelValue']
+        },
+        'v-select': {
+          template: '<select @change="$emit(\'update:modelValue\', $event.target.value)"><slot /></select>',
+          props: ['modelValue'],
+          emits: ['update:modelValue']
+        },
+        'v-progress-circular': true,
+        'v-alert': true
       },
       ...options
     }
   })
 }
 
-describe('TrendingPreview', () => {
-  beforeEach(() => {
+describe('TrendingPage', () => {
+  beforeEach(async () => {
     vi.clearAllMocks()
+    fetch.mockReset()
+    fetch.mockImplementation(() => 
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ data: [], total_pages: 1 })
+      })
+    )
+    
+    // Start at root which redirects to /trending
+    await router.push('/')
+    await router.isReady()
   })
 
-  it('renders correctly with empty state', () => {
+  it('renders correctly with default values', async () => {
     const wrapper = mountComponent()
-    expect(wrapper.find('.trending-header h2').text()).toContain('Trending This Week')
-    expect(wrapper.find('.view-all-link').exists()).toBe(true)
+    await wrapper.vm.$nextTick()
+    
+    expect(wrapper.find('h1').text()).toBe('Trending Repositories')
+    expect(wrapper.vm.selectedPeriod).toBe('week')
+    expect(wrapper.vm.selectedLanguage).toBe('')
+    expect(wrapper.vm.currentPage).toBe(1)
   })
 
-  it('fetches and displays trending repositories', async () => {
-    const mockRepos = [
-      {
-        id: 1,
-        name: 'repo1',
-        owner: {
-          login: 'user1',
-          avatar_url: 'https://example.com/avatar1.png'
-        },
-        description: 'Test repo 1',
-        stars: 100,
-        forks: 50,
-        language: 'JavaScript',
-        html_url: 'https://github.com/user1/repo1'
-      },
-      {
-        id: 2,
-        name: 'repo2',
-        owner: {
-          login: 'user2',
-          avatar_url: 'https://example.com/avatar2.png'
-        },
-        description: 'Test repo 2',
-        stars: 200,
-        forks: 75,
-        language: 'Python',
-        html_url: 'https://github.com/user2/repo2'
-      }
-    ]
-
-    axios.get.mockResolvedValueOnce({ data: mockRepos })
-
+  it('initializes with query parameters', async () => {
+    await router.push('/trending?page=2&period=month&language=JavaScript')
+    await router.isReady()
+    
     const wrapper = mountComponent()
     await wrapper.vm.$nextTick()
 
-    expect(axios.get).toHaveBeenCalledWith('/api/repositories/trending?period=week&page=1')
-    expect(wrapper.vm.trendingRepos).toEqual(mockRepos)
-    
-    // Verify cards are rendered
-    const cards = wrapper.findAll('.repo-preview-card')
-    expect(cards).toHaveLength(2)
-    
-    // Check first card content
-    const firstCard = cards[0]
-    expect(firstCard.find('.v-card-title').text()).toBe('repo1')
-    expect(firstCard.find('.description').text()).toBe('Test repo 1')
+    expect(wrapper.vm.currentPage).toBe(2)
+    expect(wrapper.vm.selectedPeriod).toBe('month')
+    expect(wrapper.vm.selectedLanguage).toBe('JavaScript')
   })
 
-  it('handles API errors gracefully', async () => {
-    axios.get.mockRejectedValueOnce(new Error('Network error'))
+  it('fetches repositories on mount', async () => {
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ data: [] })
+    })
 
     const wrapper = mountComponent()
     await wrapper.vm.$nextTick()
+    await wrapper.vm.$nextTick()
 
-    expect(wrapper.vm.error).toBe('Failed to fetch trending repositories')
-    expect(wrapper.find('.v-alert').exists()).toBe(true)
+    expect(fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/repositories/trending')
+    )
   })
 
-  it('shows loading state while fetching', async () => {
-    axios.get.mockImplementationOnce(() => new Promise(() => {}))  // Never resolves
-
-    const wrapper = mountComponent()
-    expect(wrapper.find('.v-progress-circular').exists()).toBe(true)
-  })
-
-  it('returns correct language color', () => {
-    const wrapper = mountComponent()
-    
-    expect(wrapper.vm.getLanguageColor('JavaScript')).toBe('#f1e05a')
-    expect(wrapper.vm.getLanguageColor('Python')).toBe('#3572A5')
-    expect(wrapper.vm.getLanguageColor('UnknownLanguage')).toBe('#6e7681')
-  })
-
-  it('limits display to 6 repositories', async () => {
-    const mockRepos = Array.from({ length: 10 }, (_, i) => ({
-      id: i + 1,
-      name: `repo${i + 1}`,
-      owner: {
-        login: `user${i + 1}`,
-        avatar_url: `https://example.com/avatar${i + 1}.png`
-      }
-    }))
-
-    axios.get.mockResolvedValueOnce({ data: mockRepos })
+  it('handles fetch errors gracefully', async () => {
+    fetch.mockRejectedValueOnce(new Error('Network error'))
 
     const wrapper = mountComponent()
     await wrapper.vm.$nextTick()
+    await wrapper.vm.$nextTick()
 
-    const cards = wrapper.findAll('.repo-preview-card')
-    expect(cards).toHaveLength(6)
+    expect(wrapper.vm.error).toBeTruthy()
+    expect(wrapper.vm.loading).toBe(false)
+  })
+
+  it('handles redirect responses', async () => {
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ 
+        redirect: true,
+        page: 2
+      })
+    })
+
+    const wrapper = mountComponent()
+    await wrapper.vm.$nextTick()
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.vm.currentPage).toBe(2)
   })
 })

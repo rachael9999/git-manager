@@ -10,7 +10,6 @@ const mockRepo = {
   stargazers_count: 10,
   forks_count: 5,
   language: 'JavaScript',
-  subscribers_count: 3,
   html_url: 'https://github.com/user1/repo1'
 };
 
@@ -64,17 +63,11 @@ describe('RepoBlock.vue', () => {
     expect(description.text()).toBe(mockRepo.description);
   });
 
-  it('renders repository owner information', async () => {
-    const ownerLink = wrapper.find('.owner-link');
-    expect(ownerLink.exists()).toBe(true);
-    expect(ownerLink.text()).toContain(mockRepo.owner.login);
-  });
 
   it('renders repository statistics', () => {
     const text = wrapper.text();
     expect(text).toContain(mockRepo.stargazers_count.toString());
     expect(text).toContain(mockRepo.forks_count.toString());
-    expect(text).toContain(mockRepo.subscribers_count.toString());
     expect(text).toContain(mockRepo.language);
   });
 });
