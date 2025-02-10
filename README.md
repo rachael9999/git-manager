@@ -3,9 +3,9 @@
 A modern web application for exploring GitHub repositories with advanced features including real-time updates, caching, and trending repository analysis.
 
 ## nginx handling
-Main application: http://localhost
-API endpoints: http://localhost/api/...
-Swagger docs: http://localhost/api-docs
+- Main application: http://localhost
+- API endpoints: http://localhost/api/...
+- Swagger docs: http://localhost/api-docs
 
 ## Features
 
@@ -86,18 +86,17 @@ docker-compose up --build
 ```
 .
 ├── frontend/                 # Vue.js frontend application
-│   ├── src/                 # Source files
-│   ├── public/              # Static files
-│   ├── tests/              # Frontend tests
-│   ├── nginx.conf          # Nginx configuration
-│   └── Dockerfile.dev      # Frontend Docker configuration
-├── backend/                # Node.js backend application
-│   ├── routes/            # API routes
-│   ├── service/           # Business logic
-│   ├── middleware/        # Custom middleware
-│   ├── utils/            # Utility functions
-│   └── Dockerfile.dev    # Backend Docker configuration
-└── docker-compose.yml    # Docker compose configuration
+│   ├── src/                  # Source files
+│   ├── public/               # Static files
+│   ├── nginx.conf            # Nginx configuration
+│   └── Dockerfile.dev        # Frontend Docker configuration
+├── backend/                  # Node.js backend application
+│   ├── routes/               # API routes
+│   ├── service/              # Business logic
+│   ├── middleware/           # redis, rate limiter
+│   ├── utils/                # Utility functions
+│   └── Dockerfile.dev        # Backend Docker configuration
+└── docker-compose.yml        # Docker compose configuration
 ```
 
 ## API Documentation
@@ -158,9 +157,3 @@ npm run test
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- GitHub API for providing the data
-- Vue.js team for the amazing framework
-- Docker team for containerization support

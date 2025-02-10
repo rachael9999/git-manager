@@ -26,7 +26,7 @@ services:
       - NODE_ENV=development
       - PORT=3000
       - SESSION_SECRET=git
-      - GITHUB_PERSONAL_ACCESS_TOKEN=****************
+      - GITHUB_PERSONAL_ACCESS_TOKEN=${GITHUB_PERSONAL_ACCESS_TOKEN}
       - REDIS_URL=redis://redis:6379
       - CORS_ORIGIN=http://localhost:5173
       - HTTP_PROXY=http://host.docker.internal:7890
