@@ -125,12 +125,25 @@ export default {
       try {
         const { period = this.selectedPeriod, language = this.selectedLanguage, page = this.currentPage } = this.$route.query
         
-        let url = `http://localhost:3000/repositories/trending?period=${period}&page=${page}`
+        let url = `/api/repositories/trending?period=${period}&page=${page}`
         if (language) {
           url += `&language=${language}`
         }
 
         const response = await fetch(url)
+        if (!response.ok) {
+          const errorData = await response.json()
+          if (response.status === 401 || response.status === 403) {
+            this.error = 'GitHub API authentication failed. Please check your token.'
+          } else if (response.status === 422) {
+            this.error = 'Invalid query parameters'
+          } else {
+            this.error = errorData.error || 'Failed to fetch trending repositories'
+          }
+          console.error('API Error:', errorData)
+          return
+        }
+
         const responseData = await response.json()
 
         if (responseData.status === 303 || responseData.redirect) {

@@ -22,6 +22,7 @@ async function fetchUserProfile(username) {
     const response = await rateLimiter.schedule(() =>
       axios.get(`https://api.github.com/users/${username}`, {
       headers: {
+        Authorization: `Bearer ${process.env.GITHUB_PERSONAL_ACCESS_TOKEN}`,
         Accept: 'application/vnd.github.v3+json'
       },
       proxy: false
@@ -77,6 +78,7 @@ async function fetchUserRepos(username, page = 1) {
     const response = await rateLimiter.schedule(() => 
       axios.get(`https://api.github.com/users/${username}/repos`, {
       headers: {
+        Authorization: `Bearer ${process.env.GITHUB_PERSONAL_ACCESS_TOKEN}`,
         Accept: 'application/vnd.github.v3+json'
       },
       proxy: false

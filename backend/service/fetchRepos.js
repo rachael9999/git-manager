@@ -173,6 +173,10 @@ async function fetchTrendingRepositories(period = 'day', language, requestedPage
       })
     );
 
+    if (!response.data || !Array.isArray(response.data.items)) {
+      throw new Error('Invalid response format from GitHub API');
+    }
+
     const filteredData = response.data.items.map(repo => ({
       id: repo.id,
       name: repo.name,
@@ -201,7 +205,7 @@ async function fetchTrendingRepositories(period = 'day', language, requestedPage
 
     for (let i = 0; i < pages.length; i++) {
       const pageKey = `trending_${period}_${language || 'all'}_page_${startPage + i}`;
-      cache.setCacheValue(pageKey, {
+      await cache.setCacheValue(pageKey, {
         status: 200,
         data: pages[i],
         total_pages: pages.length
@@ -215,25 +219,36 @@ async function fetchTrendingRepositories(period = 'day', language, requestedPage
     };
   } catch (error) {
     logger.error('Trending repositories fetch error:', error);
+    
+    // Handle specific error cases
+    if (error.response) {
+      if (error.response.status === 401 || error.response.status === 403) {
+        throw { ...error, status: error.response.status, message: 'GitHub API authentication failed' };
+      } else if (error.response.status === 422) {
+        throw { ...error, status: error.response.status, message: 'Invalid query parameters' };
+      }
+    }
+    
     throw error;
   }
 }
 
 function getDate(period) {
-  const now = new Date();
+  const date = new Date();
   switch (period) {
     case 'day':
-      now.setDate(now.getDate() - 1);
-      break;
-    case 'month':
-      now.setMonth(now.getMonth() - 1);
+      date.setDate(date.getDate() - 1);
       break;
     case 'week':
-    default:
-      now.setDate(now.getDate() - 7);
+      date.setDate(date.getDate() - 7);
       break;
+    case 'month':
+      date.setMonth(date.getMonth() - 1);
+      break;
+    default:
+      date.setDate(date.getDate() - 1);
   }
-  return now.toISOString().split('T')[0];
+  return date.toISOString().split('T')[0];
 }
 
 module.exports = { fetchRepositories, fetchRepoDetail, fetchTrendingRepositories };
